@@ -1,0 +1,31 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "scan",
+    srcs = ["src/lib.rs"],
+    crate_name = "twigz_scan",
+    edition = "2021",
+    deps = [
+        "//crates/ir",
+    ],
+)
+
+rust_test(
+    name = "scan_test",
+    srcs = ["scan_test.rs"],
+    crate_name = "twigz_scan_test",
+    compile_data = [
+        "//data:fixtures",
+        "//grammars:grammar_files",
+    ],
+    edition = "2021",
+    deps = [
+        ":scan",
+        "//crates/dsl",
+        "//crates/elaborate",
+        "//crates/generate",
+        "//crates/ir",
+    ],
+)

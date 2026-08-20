@@ -1,0 +1,14 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_binary(
+    name = "twigz-query",
+    srcs = ["src/main.rs"],
+    crate_name = "twigz_query_bin",
+    edition = "2021",
+    deps = [
+        "//crates/query",
+        "//crates/runtime",
+    ],
+)

@@ -1,0 +1,36 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "query",
+    srcs = ["src/lib.rs"],
+    crate_name = "twigz_query",
+    edition = "2021",
+    deps = [
+        "//crates/runtime",
+        "//crates/vocab",
+        "@crates//:regex",
+    ],
+)
+
+rust_test(
+    name = "query_test",
+    srcs = ["query_test.rs"],
+    crate_name = "twigz_query_test",
+    compile_data = [
+        "//data:fixtures",
+        "//data:goldens",
+    ],
+    data = [
+        "//data:fixtures",
+        "//data:goldens",
+    ],
+    edition = "2021",
+    deps = [
+        ":query",
+        "//crates/runtime",
+        "//crates/vocab",
+        "@crates//:serde_json",
+    ],
+)

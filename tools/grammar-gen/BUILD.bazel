@@ -1,0 +1,19 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_test")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_binary(
+    name = "twigz-grammar-gen",
+    srcs = ["src/main.rs"],
+    crate_name = "twigz_grammar_gen",
+    edition = "2021",
+    deps = ["//crates/generate"],
+)
+
+rust_test(
+    name = "flags_test",
+    srcs = ["flags_test.rs"],
+    crate_name = "twigz_grammar_gen_flags_test",
+    data = [":twigz-grammar-gen"],
+    edition = "2021",
+)

@@ -1,0 +1,14 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "ir",
+    srcs = ["src/lib.rs"],
+    crate_name = "twigz_ir",
+    edition = "2021",
+    deps = [
+        "@crates//:serde"
+    ],
+)
+

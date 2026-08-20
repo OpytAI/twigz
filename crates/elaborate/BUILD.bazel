@@ -1,0 +1,15 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "elaborate",
+    srcs = ["src/lib.rs"],
+    crate_name = "twigz_elaborate",
+    edition = "2021",
+    deps = [
+        "//crates/ast",
+        "//crates/ir"
+    ],
+)
+

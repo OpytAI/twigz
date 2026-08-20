@@ -1,0 +1,6 @@
+fn greet(name):
+    x = name
+    y = 1
+
+fn other():
+    z = 2

@@ -1,0 +1,30 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "pack",
+    srcs = ["src/lib.rs"],
+    crate_name = "twigz_pack",
+    edition = "2021",
+    deps = [
+        "@crates//:rustc-hash",
+        "@crates//:serde_json",
+        "@crates//:sha2",
+        "@tree_sitter//:generate",
+    ],
+)
+
+rust_test(
+    name = "pack_test",
+    srcs = ["pack_test.rs"],
+    crate_name = "twigz_pack_test",
+    data = ["//tools/pack:twigz-pack"],
+    edition = "2021",
+    deps = [
+        ":pack",
+        "//crates/generate",
+        "@crates//:serde_json",
+        "@crates//:sha2",
+    ],
+)

@@ -1,0 +1,9 @@
+{
+  "source": "(function name: (identifier) @n)",
+  "patterns": 2,
+  "heads": [
+    "function_declaration",
+    "local_function_declaration"
+  ],
+  "rendered": "(function_declaration name: (function_name) @n)\n(local_function_declaration name: (identifier) @n)"
+}

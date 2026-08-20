@@ -1,0 +1,27 @@
+# Root package — package metadata and repo-wide aliases.
+
+exports_files([
+    "AGENTS.md",
+    "README.md",
+    "LICENSE",
+    "NOTICE",
+    "TREE_SITTER_PIN.md",
+])
+
+alias(
+    name = "twigz",
+    actual = "//crates/twigz",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "twigz-runtime",
+    actual = "//crates/runtime",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "twigz-query",
+    actual = "//crates/query",
+    visibility = ["//visibility:public"],
+)

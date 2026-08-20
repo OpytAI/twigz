@@ -1,0 +1,71 @@
+"""twigz — author a grammar; query any language the same way."""
+
+module(
+    name = "twigz",
+    version = "0.0.0",
+)
+
+bazel_dep(name = "platforms", version = "1.1.0")
+bazel_dep(name = "bazel_skylib", version = "1.9.0")
+bazel_dep(name = "rules_rust", version = "0.70.0")
+bazel_dep(name = "rules_cc", version = "0.2.18")
+bazel_dep(name = "rules_shell", version = "0.6.1")
+bazel_dep(name = "hermetic_cc_toolchain", version = "4.2.0")
+
+hermetic_cc = use_extension("@hermetic_cc_toolchain//toolchain:ext.bzl", "toolchains")
+use_repo(hermetic_cc, "zig_sdk")
+
+register_toolchains(
+    "@zig_sdk//toolchain/...",
+    "@zig_sdk//libc_aware/toolchain/...",
+)
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2021",
+    extra_target_triples = [
+        "wasm32-wasip1",
+    ],
+)
+use_repo(rust, "rust_toolchains")
+
+register_toolchains("@rust_toolchains//:all")
+
+crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
+crate.from_cargo(
+    name = "crates",
+    cargo_lockfile = "//:Cargo.lock",
+    manifests = ["//:Cargo.toml"],
+)
+use_repo(crate, "crates")
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+# Host runner for //examples/wasi-parse:wasi_parse_test. x86_64-linux only.
+http_archive(
+    name = "wasmtime",
+    build_file_content = """
+exports_files(["wasmtime"])
+filegroup(
+    name = "binary",
+    srcs = ["wasmtime"],
+    visibility = ["//visibility:public"],
+)
+""",
+    sha256 = "57752103d11f7e9e625c32142c6b8e3a62d1e4a69db9385a2bb4170bb5c58392",
+    strip_prefix = "wasmtime-v24.0.2-x86_64-linux",
+    urls = ["https://github.com/bytecodealliance/wasmtime/releases/download/v24.0.2/wasmtime-v24.0.2-x86_64-linux.tar.xz"],
+)
+
+http_archive(
+    name = "tree_sitter",
+    build_file = "//third_party/tree-sitter:BUILD.tree-sitter.bazel",
+    patch_args = ["-p1"],
+    patches = [
+        "//third_party/tree-sitter:patches/0001-json-only-generator.patch",
+        "//third_party/tree-sitter:patches/0002-structured-parser-pack.patch",
+    ],
+    sha256 = "50546072d031b0cc1bf2075f3c2a22cdc94f95845059f3c68060389eab560a40",
+    strip_prefix = "tree-sitter-d11d18f746fdfd1826362c2531ce06808f386b02",
+    urls = ["https://github.com/tree-sitter/tree-sitter/archive/d11d18f746fdfd1826362c2531ce06808f386b02.tar.gz"],
+)

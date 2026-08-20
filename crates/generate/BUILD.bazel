@@ -1,0 +1,52 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "generate",
+    srcs = ["src/lib.rs"],
+    crate_name = "twigz_generate",
+    edition = "2021",
+    deps = [
+        "//crates/backend",
+        "//crates/dsl",
+        "//crates/elaborate",
+        "//crates/ir",
+        "//crates/scan",
+        "//crates/vocab",
+        "@crates//:serde_json",
+        "@tree_sitter//:generate",
+    ],
+)
+
+rust_test(
+    name = "golden_test",
+    srcs = ["golden_test.rs"],
+    crate_name = "twigz_golden_test",
+    data = [
+        "//:TREE_SITTER_PIN.md",
+        "//data:goldens",
+        "//data:fixtures",
+        "//grammars:grammar_files",
+    ],
+    edition = "2021",
+    deps = [
+        ":generate",
+        "//crates/dsl",
+        "//crates/elaborate",
+        "//crates/ir",
+        "@crates//:serde_json",
+        "@tree_sitter//:generate",
+    ],
+)
+
+rust_binary(
+    name = "write_goldens",
+    srcs = ["write_goldens.rs"],
+    crate_name = "twigz_write_goldens",
+    edition = "2021",
+    deps = [
+        ":generate",
+        "@crates//:serde_json",
+    ],
+)

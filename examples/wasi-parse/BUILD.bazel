@@ -1,0 +1,41 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+load("//bazel:wasi.bzl", "wasi_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_binary(
+    name = "wasi_parse_c",
+    srcs = ["wasi_parse.c"],
+    copts = [
+        "-std=c11",
+        "-fPIC",
+    ],
+    deps = ["//grammars:langs_c"],
+    target_compatible_with = [
+        "@platforms//cpu:wasm32",
+        "@platforms//os:wasi",
+    ],
+)
+
+wasi_binary(
+    name = "wasi_parse_wasm",
+    bin = ":wasi_parse_c",
+)
+
+sh_test(
+    name = "wasi_parse_test",
+    srcs = ["wasi_parse_test.sh"],
+    args = [
+        "$(location @wasmtime//:wasmtime)",
+        "$(location :wasi_parse_wasm)",
+    ],
+    data = [
+        ":wasi_parse_wasm",
+        "@wasmtime//:wasmtime",
+    ],
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+)

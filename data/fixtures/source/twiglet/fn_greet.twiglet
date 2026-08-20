@@ -1,0 +1,3 @@
+# a comment
+fn greet(name):
+    x = name

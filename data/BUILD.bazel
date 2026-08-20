@@ -1,0 +1,16 @@
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "goldens",
+    srcs = glob(["goldens/**"]),
+)
+
+filegroup(
+    name = "fixtures",
+    srcs = glob(["fixtures/**"]),
+)
+
+filegroup(
+    name = "snapshot_sources",
+    srcs = glob(["goldens/snapshot/sources/*.grammar"]),
+)

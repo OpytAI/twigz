@@ -1,0 +1,44 @@
+// Semantic vocabulary for twigz. IDs 1–19 are the copied concept list.
+// class / namespace / string are append-only additions. VOCABULARY_VERSION is 2.
+
+vocabulary-version 2
+grammar-ir-version 2
+
+semantic-kind "module" id=1 { role "body" required=1; trait "scope"; }
+semantic-kind "declaration" id=2 { role "name" required=1; trait "declaration"; }
+semantic-kind "function" id=3 { role "name" required=0; role "parameters" required=1; role "body" required=1; trait "declaration"; trait "scope"; }
+semantic-kind "parameter" id=4 { role "name" required=1; trait "declaration"; }
+semantic-kind "call" id=5 { role "callee" required=1; role "arguments" required=1; }
+semantic-kind "member" id=6 { role "receiver" required=1; role "name" required=1; }
+semantic-kind "identifier" id=7 { role "name" required=0; }
+semantic-kind "literal" id=8
+semantic-kind "type" id=9
+semantic-kind "block" id=10 { role "body" required=0; trait "scope"; }
+semantic-kind "assignment" id=11 { role "left" required=1; role "right" required=1; }
+semantic-kind "branch" id=12 { role "condition" required=1; role "body" required=1; }
+semantic-kind "loop" id=13 { role "condition" required=0; role "body" required=1; }
+semantic-kind "return" id=14 { role "value" required=0; }
+semantic-kind "import" id=15 { role "source" required=1; trait "declaration"; }
+semantic-kind "table" id=16
+semantic-kind "field" id=17 { role "name" required=0; role "value" required=1; }
+semantic-kind "operator" id=18 { role "left" required=0; role "right" required=0; }
+semantic-kind "comment" id=19
+semantic-kind "class" id=20 { role "name" required=1; role "body" required=1; trait "declaration"; trait "scope"; }
+semantic-kind "namespace" id=21 { role "name" required=0; role "body" required=1; trait "scope"; }
+semantic-kind "string" id=22
+
+semantic-role "name" id=1
+semantic-role "body" id=2
+semantic-role "parameters" id=3
+semantic-role "receiver" id=4
+semantic-role "arguments" id=5
+semantic-role "callee" id=6
+semantic-role "left" id=7
+semantic-role "right" id=8
+semantic-role "condition" id=9
+semantic-role "return_type" id=10
+semantic-role "value" id=11
+semantic-role "source" id=12
+
+semantic-trait "declaration" id=1
+semantic-trait "scope" id=2

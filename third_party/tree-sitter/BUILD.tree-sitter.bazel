@@ -1,0 +1,88 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+# The generator core only. `load` enables grammar.json + node-types generation; qjs-rt remains off,
+# so no JavaScript engine or dsl.js enters the host tool.
+rust_library(
+    name = "generate",
+    srcs = glob(["crates/generate/src/**/*.rs"]),
+    compile_data = glob([
+        "crates/generate/src/*.inc",
+        "crates/generate/src/templates/*",
+    ]),
+    crate_features = ["load"],
+    crate_name = "tree_sitter_generate",
+    crate_root = "crates/generate/src/generate.rs",
+    edition = "2024",
+    deps = [
+        "@crates//:bitflags",
+        "@crates//:dunce",
+        "@crates//:indexmap",
+        "@crates//:log",
+        "@crates//:regex",
+        "@crates//:regex-syntax",
+        "@crates//:rustc-hash",
+        "@crates//:semver",
+        "@crates//:serde",
+        "@crates//:serde_json",
+        "@crates//:thiserror",
+        "@crates//:topological-sort",
+    ],
+)
+
+filegroup(
+    name = "runtime_c",
+    srcs = ["lib/src/lib.c"],
+)
+
+filegroup(
+    name = "runtime_header_files",
+    srcs = [
+        "lib/include/tree_sitter/api.h",
+        "lib/src/parser.h",
+    ],
+)
+
+# lib.c includes the runtime's implementation .c/.h files directly.
+filegroup(
+    name = "runtime_support",
+    srcs = glob(
+        ["lib/src/**"],
+        exclude = ["lib/src/lib.c"],
+    ),
+)
+
+cc_library(
+    name = "headers",
+    hdrs = [
+        "lib/include/tree_sitter/api.h",
+        "lib/src/parser.h",
+    ],
+    includes = [
+        "lib/include",
+        "lib/src",
+    ],
+    textual_hdrs = glob(
+        ["lib/src/**"],
+        exclude = ["lib/src/lib.c"],
+    ),
+)
+
+cc_library(
+    name = "runtime",
+    srcs = ["lib/src/lib.c"],
+    copts = [
+        "-std=c11",
+        "-fPIC",
+        "-D_POSIX_C_SOURCE=200112L",
+        "-D_DEFAULT_SOURCE",
+    ],
+    deps = [":headers"],
+    alwayslink = True,
+)
+
+exports_files(["LICENSE"])

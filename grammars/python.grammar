@@ -1,0 +1,106 @@
+grammar python "0.1.0"
+
+start module
+
+skip whitespace | comment | newline
+external newline | indent | dedent
+scan indent newline, indent, dedent mixed tab_is_n_spaces
+word identifier
+
+token whitespace = /[ \t]+/
+token comment = "#" /[^\n]*/
+  => comment
+token identifier = /[A-Za-z_][A-Za-z0-9_]*/
+  => identifier
+token number = /[0-9]+(\.[0-9]+)?/
+  => literal
+token string = /'([^'\\]|\\.)*'|"([^"\\]|\\.)*"|'''([^'\\]|\\.|')*'''|"""([^"\\]|\\.|")*"""/
+  => string
+
+module = body:statement*
+  => module(body)
+     derives scope
+
+statement =
+  | function_definition
+  | class_definition
+  | import_statement
+  | from_import_statement
+  | assignment_statement
+  | return_statement
+  | pass_statement
+  | expression_statement
+
+function_definition = "def" name:identifier parameters:parameters ":" body:block
+  => function(name, parameters, body)
+     derives declaration, scope
+
+class_definition = "class" name:identifier arguments? ":" body:block
+  => class(name, body)
+     derives declaration, scope
+
+import_statement = "import" source:dotted_name
+  => import(source)
+     derives declaration
+
+from_import_statement = "from" source:dotted_name "import" ("*" | separated1(identifier, ","))
+  => import(source)
+     derives declaration
+
+assignment_statement = name:identifier "=" value:expression
+  => assignment(left=name, right=value)
+
+return_statement = right 1: "return" value:expression
+  => return(value)
+
+pass_statement = "pass"
+expression_statement = expression
+
+block = indent body:statement+ dedent
+  => block(body)
+     derives scope
+
+parameters = "(" separated(parameter, ",") ")"
+
+parameter = name:identifier
+  => parameter(name)
+     derives declaration
+
+arguments = "(" separated(expression, ",") ")"
+dotted_name = identifier ("." identifier)*
+
+expression =
+  | number
+  | string
+  | identifier
+  | call_expression
+  | member_expression
+  | parenthesized
+  | binary_expression
+  | unary_expression
+
+parenthesized = "(" expression ")"
+
+call_expression = left 15: callee:expression arguments:arguments
+  => call(callee, arguments)
+
+member_expression = left 14: receiver:expression "." name:identifier
+  => member(receiver, name)
+
+prefix unary_expression over expression
+  => operator(right=argument)
+  right 12: "not" | "-"
+
+infix binary_expression over expression
+  => operator(left, right)
+  left 1: "or"
+  left 2: "and"
+  left 3: "==" | "!=" | "<" | ">" | "<=" | ">="
+  left 4: "+" | "-"
+  left 5: "*" | "/" | "%"
+
+fragment separated(item, separator) = (item (separator item)*)?
+fragment separated1(item, separator) = item (separator item)*
+
+conflict expression statement
+conflict member_expression call_expression

@@ -1,0 +1,148 @@
+grammar javascript "0.1.0"
+
+start program
+
+skip whitespace | line_comment | block_comment
+external template_head | template_middle | template_tail | regex | division
+scan slash regex, division
+scan template open template_head, close template_tail, chunk template_middle
+word identifier
+
+token whitespace = /[\t\n\r ]+/
+token line_comment = "//" /[^\n]*/
+  => comment
+token block_comment = "/*" /([^*]|\*[^\/])*/ "*/"
+  => comment
+token identifier = /[A-Za-z_$][A-Za-z0-9_$]*/
+  => identifier
+token number = /0[xX][0-9A-Fa-f]+|[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?/
+  => literal
+token string = /"([^"\\]|\\.)*"|'([^'\\]|\\.)*'/
+  => string
+
+program = body:statement*
+  => module(body)
+     derives scope
+
+statement =
+  | function_declaration ";"?
+  | named_arrow_function ";"?
+  | class_declaration ";"?
+  | import_statement ";"?
+  | export_from ";"?
+  | return_statement ";"?
+  | variable_declaration ";"?
+  | block ";"?
+
+function_declaration = "async"? "function" name:identifier parameters:parameters body:block
+  => function(name, parameters, body)
+     derives declaration, scope
+
+method_definition = "async"? name:identifier parameters:parameters body:block
+  => function(name, parameters, body)
+     derives declaration, scope
+
+named_arrow_function = left 16: ("const" | "let" | "var") name:identifier "=" parameters:parameters "=>" body:(block | expression)
+  => function(name, parameters, body)
+     derives declaration, scope
+
+arrow_function = parameters:parameters "=>" body:(block | expression)
+  => function(parameters, body)
+     derives scope
+
+return_statement = "return" expression
+  => return
+
+class_declaration = "class" name:identifier heritage? body:class_body
+  => class(name, body)
+     derives declaration, scope
+
+heritage = "extends" identifier
+
+class_body = "{" body:method_definition* "}"
+  => block(body)
+     derives scope
+
+import_statement = "import" (import_clause "from")? source:string
+  => import(source)
+     derives declaration
+
+export_from = "export" "{" identifier "}" "from" source:string
+  => import(source)
+     derives declaration
+
+import_clause = identifier | namespace_import | named_imports
+namespace_import = "*" "as" identifier
+named_imports = "{" separated(identifier, ",") "}"
+
+variable_declaration = ("const" | "let" | "var") name:identifier "=" value:expression
+  => declaration(name)
+     derives declaration
+
+block = "{" body:statement* "}"
+  => block(body)
+     derives scope
+
+parameters = "(" separated(parameter, ",") ")"
+
+parameter = name:identifier
+  => parameter(name)
+     derives declaration
+
+boolean = "true" | "false"
+  => literal
+
+null = "null"
+  => literal
+
+open expression =
+  | "this"
+  | boolean
+  | null
+  | number
+  | string
+  | identifier
+  | arrow_function
+  | template_literal
+  | regex
+  | parenthesized
+  | member_expression
+  | call_expression
+  | binary_expression
+  | unary_expression
+
+parenthesized = "(" expression ")"
+
+template_literal = template_head ((expression template_middle)* expression? template_tail)?
+  => string
+
+member_expression = left 14: receiver:expression ("." name:identifier | "[" expression "]")
+  => member(receiver, name)
+
+call_expression = left 15: callee:expression arguments:arguments
+  => call(callee, arguments)
+
+arguments = "(" separated(expression, ",") ")"
+
+prefix unary_expression over expression
+  => operator(right=argument)
+  right 13: "!" | "-" | "typeof" | "void"
+
+infix binary_expression over expression
+  => operator(left, right)
+  left 1: "||" | "??"
+  left 2: "&&"
+  left 3: "==" | "!=" | "===" | "!=="
+  left 4: "<" | ">" | "<=" | ">="
+  left 5: "+" | "-"
+  left 6: "*" | division | "%"
+
+fragment separated(item, separator) = (item (separator item)*)?
+
+conflict expression statement
+conflict expression parameter
+conflict member_expression call_expression
+conflict named_arrow_function variable_declaration
+conflict named_arrow_function arrow_function
+conflict template_literal
+conflict template_literal expression

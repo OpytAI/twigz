@@ -1,0 +1,22 @@
+# twigz build configuration.
+# Hermetic Rust (rules_rust 0.70) and hermetic C (hermetic_cc_toolchain).
+
+# Bzlmod only — no legacy WORKSPACE.
+common --enable_workspace=false
+common --enable_bzlmod
+
+# Tests and tools locate inputs via runfiles.
+common --enable_runfiles
+
+# Hermetic actions: declared env only (no ambient $PATH tools).
+common --incompatible_strict_action_env
+
+# Show failing test output.
+test --test_output=errors
+
+# BCR only for now.
+common --registry=https://bcr.bazel.build/
+
+# Optional machine-specific overrides (gitignored). Use this file to set an
+# alternate output_user_root when Bazel's platform default is not suitable.
+try-import %workspace%/user.bazelrc

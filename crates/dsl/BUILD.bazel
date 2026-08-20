@@ -1,0 +1,29 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "dsl",
+    srcs = ["src/lib.rs"],
+    crate_name = "twigz_dsl",
+    edition = "2021",
+    deps = [
+        "//crates/ast"
+    ],
+)
+
+rust_test(
+    name = "dsl_test",
+    srcs = ["dsl_test.rs"],
+    crate_name = "twigz_dsl_test",
+    edition = "2021",
+    deps = [
+        ":dsl",
+        "//crates/ast",
+        "//crates/backend",
+        "//crates/elaborate",
+        "//crates/format",
+        "//crates/ir",
+    ],
+)
+

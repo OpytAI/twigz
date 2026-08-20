@@ -1,0 +1,22 @@
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "twigz",
+    srcs = ["src/lib.rs"],
+    crate_name = "twigz",
+    edition = "2021",
+    deps = [
+        "//crates/ast",
+        "//crates/backend",
+        "//crates/dsl",
+        "//crates/elaborate",
+        "//crates/format",
+        "//crates/generate",
+        "//crates/ir",
+        "//crates/pack",
+        "//crates/scan",
+        "//crates/vocab",
+    ],
+)

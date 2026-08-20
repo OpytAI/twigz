@@ -1,0 +1,57 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "runtime_core",
+    srcs = ["src/lib.rs"],
+    crate_name = "twigz_runtime",
+    edition = "2021",
+    deps = [
+        "//crates/vocab",
+        "//grammars:ts_c",
+        "@crates//:libloading",
+        "@crates//:serde_json",
+    ],
+)
+
+rust_library(
+    name = "runtime",
+    srcs = ["src/lib.rs"],
+    compile_data = ["//data:goldens"],
+    crate_features = ["langs"],
+    crate_name = "twigz_runtime",
+    edition = "2021",
+    deps = [
+        "//crates/vocab",
+        "//grammars:langs_c",
+        "//grammars:ts_c",
+        "@crates//:libloading",
+        "@crates//:serde_json",
+    ],
+)
+
+rust_test(
+    name = "runtime_test",
+    srcs = ["runtime_test.rs"],
+    compile_data = ["//data:fixtures"],
+    crate_name = "twigz_runtime_test",
+    data = ["//data:fixtures"],
+    edition = "2021",
+    deps = [
+        ":runtime",
+        "//crates/vocab",
+    ],
+)
+
+rust_test(
+    name = "load_test",
+    srcs = ["load_test.rs"],
+    crate_name = "twigz_runtime_load_test",
+    data = ["//grammars:twiglet_cdylib"],
+    edition = "2021",
+    deps = [
+        ":runtime_core",
+        "//crates/vocab",
+    ],
+)

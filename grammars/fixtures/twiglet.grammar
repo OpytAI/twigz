@@ -1,0 +1,53 @@
+grammar twiglet "0.1.0"
+
+start module
+
+skip whitespace | line_comment | newline
+external newline | indent | dedent | interp_open | interp_close
+scan indent newline, indent, dedent
+scan template open interp_open, close interp_close
+word identifier
+
+token whitespace = /[ \t]+/
+token line_comment = "#" /[^\n]*/
+  => comment
+token identifier = /[A-Za-z_][A-Za-z0-9_]*/
+  => identifier
+token number = /[0-9]+/
+  => literal
+token quoted_string = /"([^"\\]|\\.)*"/
+  => string
+
+module = body:statement*
+  => module(body)
+     derives scope
+
+statement = fn_declaration | import_statement | assign_statement
+
+fn_declaration = "fn" name:identifier parameters:parameters ":" body:block
+  => function(name, parameters, body)
+     derives declaration, scope
+
+parameters = "(" separated(parameter, ",") ")"
+
+parameter = name:identifier
+  => parameter(name)
+     derives declaration
+
+import_statement = "import" source:quoted_string
+  => import(source)
+     derives declaration
+
+assign_statement = name:identifier "=" value:expression
+  => assignment(left=name, right=value)
+
+block = indent body:statement+ dedent
+  => block(body)
+     derives scope
+
+expression = identifier | number | quoted_string | interpolated_string
+
+interpolated_string = interp_open interp_body:expression interp_close
+  => string
+
+fragment separated(item, separator) = (item (separator item)*)?

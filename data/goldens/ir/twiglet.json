@@ -1,0 +1,388 @@
+{
+  "ir_version": 2,
+  "name": "twiglet",
+  "version": "0.1.0",
+  "start": "module",
+  "rules": {
+    "assign_statement": {
+      "Sequence": [
+        {
+          "Field": {
+            "name": "name",
+            "content": {
+              "Symbol": "identifier"
+            }
+          }
+        },
+        {
+          "Literal": "="
+        },
+        {
+          "Field": {
+            "name": "value",
+            "content": {
+              "Symbol": "expression"
+            }
+          }
+        }
+      ]
+    },
+    "block": {
+      "Sequence": [
+        {
+          "Symbol": "indent"
+        },
+        {
+          "Field": {
+            "name": "body",
+            "content": {
+              "Repeat1": {
+                "Symbol": "statement"
+              }
+            }
+          }
+        },
+        {
+          "Symbol": "dedent"
+        }
+      ]
+    },
+    "expression": {
+      "Choice": [
+        {
+          "Symbol": "identifier"
+        },
+        {
+          "Symbol": "number"
+        },
+        {
+          "Symbol": "quoted_string"
+        },
+        {
+          "Symbol": "interpolated_string"
+        }
+      ]
+    },
+    "fn_declaration": {
+      "Sequence": [
+        {
+          "Literal": "fn"
+        },
+        {
+          "Field": {
+            "name": "name",
+            "content": {
+              "Symbol": "identifier"
+            }
+          }
+        },
+        {
+          "Field": {
+            "name": "parameters",
+            "content": {
+              "Symbol": "parameters"
+            }
+          }
+        },
+        {
+          "Literal": ":"
+        },
+        {
+          "Field": {
+            "name": "body",
+            "content": {
+              "Symbol": "block"
+            }
+          }
+        }
+      ]
+    },
+    "identifier": {
+      "Token": {
+        "Pattern": {
+          "value": "[A-Za-z_][A-Za-z0-9_]*",
+          "flags": ""
+        }
+      }
+    },
+    "import_statement": {
+      "Sequence": [
+        {
+          "Literal": "import"
+        },
+        {
+          "Field": {
+            "name": "source",
+            "content": {
+              "Symbol": "quoted_string"
+            }
+          }
+        }
+      ]
+    },
+    "interpolated_string": {
+      "Sequence": [
+        {
+          "Symbol": "interp_open"
+        },
+        {
+          "Field": {
+            "name": "interp_body",
+            "content": {
+              "Symbol": "expression"
+            }
+          }
+        },
+        {
+          "Symbol": "interp_close"
+        }
+      ]
+    },
+    "line_comment": {
+      "Token": {
+        "Sequence": [
+          {
+            "Literal": "#"
+          },
+          {
+            "Pattern": {
+              "value": "[^\\n]*",
+              "flags": ""
+            }
+          }
+        ]
+      }
+    },
+    "module": {
+      "Field": {
+        "name": "body",
+        "content": {
+          "Repeat": {
+            "Symbol": "statement"
+          }
+        }
+      }
+    },
+    "number": {
+      "Token": {
+        "Pattern": {
+          "value": "[0-9]+",
+          "flags": ""
+        }
+      }
+    },
+    "parameter": {
+      "Field": {
+        "name": "name",
+        "content": {
+          "Symbol": "identifier"
+        }
+      }
+    },
+    "parameters": {
+      "Sequence": [
+        {
+          "Literal": "("
+        },
+        {
+          "Choice": [
+            {
+              "Sequence": [
+                {
+                  "Symbol": "parameter"
+                },
+                {
+                  "Repeat": {
+                    "Sequence": [
+                      {
+                        "Literal": ","
+                      },
+                      {
+                        "Symbol": "parameter"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "Empty"
+          ]
+        },
+        {
+          "Literal": ")"
+        }
+      ]
+    },
+    "quoted_string": {
+      "Token": {
+        "Pattern": {
+          "value": "\"([^\"\\\\]|\\\\.)*\"",
+          "flags": ""
+        }
+      }
+    },
+    "statement": {
+      "Choice": [
+        {
+          "Symbol": "fn_declaration"
+        },
+        {
+          "Symbol": "import_statement"
+        },
+        {
+          "Symbol": "assign_statement"
+        }
+      ]
+    },
+    "whitespace": {
+      "Token": {
+        "Pattern": {
+          "value": "[ \\t]+",
+          "flags": ""
+        }
+      }
+    }
+  },
+  "extras": [
+    {
+      "Symbol": "whitespace"
+    },
+    {
+      "Symbol": "line_comment"
+    },
+    {
+      "Symbol": "newline"
+    }
+  ],
+  "externals": [
+    {
+      "Symbol": "newline"
+    },
+    {
+      "Symbol": "indent"
+    },
+    {
+      "Symbol": "dedent"
+    },
+    {
+      "Symbol": "interp_open"
+    },
+    {
+      "Symbol": "interp_close"
+    }
+  ],
+  "inline": [],
+  "supertypes": [],
+  "word": "identifier",
+  "conflicts": [],
+  "precedences": [],
+  "semantic": [
+    {
+      "concrete": "assign_statement",
+      "semantic": "assignment",
+      "roles": {
+        "left": "name",
+        "right": "value"
+      },
+      "traits": []
+    },
+    {
+      "concrete": "block",
+      "semantic": "block",
+      "roles": {
+        "body": "body"
+      },
+      "traits": [
+        "scope"
+      ]
+    },
+    {
+      "concrete": "fn_declaration",
+      "semantic": "function",
+      "roles": {
+        "body": "body",
+        "name": "name",
+        "parameters": "parameters"
+      },
+      "traits": [
+        "declaration",
+        "scope"
+      ]
+    },
+    {
+      "concrete": "identifier",
+      "semantic": "identifier",
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "import_statement",
+      "semantic": "import",
+      "roles": {
+        "source": "source"
+      },
+      "traits": [
+        "declaration"
+      ]
+    },
+    {
+      "concrete": "interpolated_string",
+      "semantic": "string",
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "line_comment",
+      "semantic": "comment",
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "module",
+      "semantic": "module",
+      "roles": {
+        "body": "body"
+      },
+      "traits": [
+        "scope"
+      ]
+    },
+    {
+      "concrete": "number",
+      "semantic": "literal",
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "parameter",
+      "semantic": "parameter",
+      "roles": {
+        "name": "name"
+      },
+      "traits": [
+        "declaration"
+      ]
+    },
+    {
+      "concrete": "quoted_string",
+      "semantic": "string",
+      "roles": {},
+      "traits": []
+    }
+  ],
+  "scans": [
+    {
+      "machine": "Indent",
+      "newline": "newline",
+      "indent": "indent",
+      "dedent": "dedent",
+      "tab_width": 8,
+      "mixed": "error"
+    },
+    {
+      "machine": "Template",
+      "open": "interp_open",
+      "close": "interp_close"
+    }
+  ]
+}

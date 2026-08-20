@@ -1,0 +1,22 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "vocab",
+    srcs = ["src/lib.rs"],
+    crate_name = "twigz_vocab",
+    edition = "2021",
+    deps = [
+        "@crates//:serde"
+    ],
+)
+
+rust_test(
+    name = "vocab_test",
+    srcs = ["src/vocab_test.rs"],
+    crate_name = "twigz_vocab_test",
+    edition = "2021",
+    deps = [":vocab"],
+)
+

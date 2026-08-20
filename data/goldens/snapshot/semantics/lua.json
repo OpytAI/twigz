@@ -1,0 +1,449 @@
+{
+  "language": "lua",
+  "language_version": "5.4.0",
+  "grammar_version": "5.4.0",
+  "grammar_ir_version": 2,
+  "vocabulary_version": 2,
+  "tree_sitter_abi": 15,
+  "mappings": [
+    {
+      "concrete": "assignment_statement",
+      "semantic": "assignment",
+      "semantic_id": 11,
+      "roles": {
+        "left": {
+          "id": 7,
+          "concrete": "left",
+          "types": [
+            "variable"
+          ]
+        },
+        "right": {
+          "id": 8,
+          "concrete": "right",
+          "types": [
+            "_expression"
+          ]
+        }
+      },
+      "traits": []
+    },
+    {
+      "concrete": "binary_expression",
+      "semantic": "operator",
+      "semantic_id": 18,
+      "roles": {
+        "left": {
+          "id": 7,
+          "concrete": "left",
+          "types": [
+            "_expression"
+          ]
+        },
+        "right": {
+          "id": 8,
+          "concrete": "right",
+          "types": [
+            "_expression"
+          ]
+        }
+      },
+      "traits": []
+    },
+    {
+      "concrete": "block",
+      "semantic": "block",
+      "semantic_id": 10,
+      "roles": {
+        "body": {
+          "id": 2,
+          "concrete": "body",
+          "types": [
+            "_statement"
+          ]
+        }
+      },
+      "traits": [
+        {
+          "id": 2,
+          "name": "scope"
+        }
+      ]
+    },
+    {
+      "concrete": "field_entry",
+      "semantic": "field",
+      "semantic_id": 17,
+      "roles": {
+        "name": {
+          "id": 1,
+          "concrete": "name",
+          "types": [
+            "_expression",
+            "identifier"
+          ]
+        },
+        "value": {
+          "id": 11,
+          "concrete": "value",
+          "types": [
+            "_expression"
+          ]
+        }
+      },
+      "traits": []
+    },
+    {
+      "concrete": "function_call",
+      "semantic": "call",
+      "semantic_id": 5,
+      "roles": {
+        "arguments": {
+          "id": 5,
+          "concrete": "arguments",
+          "types": [
+            "arguments"
+          ]
+        },
+        "callee": {
+          "id": 6,
+          "concrete": "callee",
+          "types": [
+            "_prefix_expression"
+          ]
+        }
+      },
+      "traits": []
+    },
+    {
+      "concrete": "function_declaration",
+      "semantic": "function",
+      "semantic_id": 3,
+      "roles": {
+        "body": {
+          "id": 2,
+          "concrete": "body",
+          "types": [
+            "block"
+          ]
+        },
+        "name": {
+          "id": 1,
+          "concrete": "name",
+          "types": [
+            "function_name"
+          ]
+        },
+        "parameters": {
+          "id": 3,
+          "concrete": "parameters",
+          "types": [
+            "parameters"
+          ]
+        }
+      },
+      "traits": [
+        {
+          "id": 1,
+          "name": "declaration"
+        },
+        {
+          "id": 2,
+          "name": "scope"
+        }
+      ]
+    },
+    {
+      "concrete": "function_expression",
+      "semantic": "function",
+      "semantic_id": 3,
+      "roles": {
+        "body": {
+          "id": 2,
+          "concrete": "body",
+          "types": [
+            "block"
+          ]
+        },
+        "parameters": {
+          "id": 3,
+          "concrete": "parameters",
+          "types": [
+            "parameters"
+          ]
+        }
+      },
+      "traits": [
+        {
+          "id": 2,
+          "name": "scope"
+        }
+      ]
+    },
+    {
+      "concrete": "identifier",
+      "semantic": "identifier",
+      "semantic_id": 7,
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "if_statement",
+      "semantic": "branch",
+      "semantic_id": 12,
+      "roles": {
+        "body": {
+          "id": 2,
+          "concrete": "body",
+          "types": [
+            "block"
+          ]
+        },
+        "condition": {
+          "id": 9,
+          "concrete": "condition",
+          "types": [
+            "_expression"
+          ]
+        }
+      },
+      "traits": []
+    },
+    {
+      "concrete": "line_comment",
+      "semantic": "comment",
+      "semantic_id": 19,
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "local_function_declaration",
+      "semantic": "function",
+      "semantic_id": 3,
+      "roles": {
+        "body": {
+          "id": 2,
+          "concrete": "body",
+          "types": [
+            "block"
+          ]
+        },
+        "name": {
+          "id": 1,
+          "concrete": "name",
+          "types": [
+            "identifier"
+          ]
+        },
+        "parameters": {
+          "id": 3,
+          "concrete": "parameters",
+          "types": [
+            "parameters"
+          ]
+        }
+      },
+      "traits": [
+        {
+          "id": 1,
+          "name": "declaration"
+        },
+        {
+          "id": 2,
+          "name": "scope"
+        }
+      ]
+    },
+    {
+      "concrete": "long_comment",
+      "semantic": "comment",
+      "semantic_id": 19,
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "long_string",
+      "semantic": "literal",
+      "semantic_id": 8,
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "lua_family_unit",
+      "semantic": "module",
+      "semantic_id": 1,
+      "roles": {
+        "body": {
+          "id": 2,
+          "concrete": "body",
+          "types": [
+            "_statement"
+          ]
+        }
+      },
+      "traits": [
+        {
+          "id": 2,
+          "name": "scope"
+        }
+      ]
+    },
+    {
+      "concrete": "member_expression",
+      "semantic": "member",
+      "semantic_id": 6,
+      "roles": {
+        "name": {
+          "id": 1,
+          "concrete": "name",
+          "types": [
+            "identifier"
+          ]
+        },
+        "receiver": {
+          "id": 4,
+          "concrete": "receiver",
+          "types": [
+            "_prefix_expression"
+          ]
+        }
+      },
+      "traits": []
+    },
+    {
+      "concrete": "number",
+      "semantic": "literal",
+      "semantic_id": 8,
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "parameter",
+      "semantic": "parameter",
+      "semantic_id": 4,
+      "roles": {
+        "name": {
+          "id": 1,
+          "concrete": "name",
+          "types": [
+            "identifier"
+          ]
+        }
+      },
+      "traits": [
+        {
+          "id": 1,
+          "name": "declaration"
+        }
+      ]
+    },
+    {
+      "concrete": "quoted_string",
+      "semantic": "literal",
+      "semantic_id": 8,
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "repeat_statement",
+      "semantic": "loop",
+      "semantic_id": 13,
+      "roles": {
+        "body": {
+          "id": 2,
+          "concrete": "body",
+          "types": [
+            "block"
+          ]
+        },
+        "condition": {
+          "id": 9,
+          "concrete": "condition",
+          "types": [
+            "_expression"
+          ]
+        }
+      },
+      "traits": []
+    },
+    {
+      "concrete": "return_statement",
+      "semantic": "return",
+      "semantic_id": 14,
+      "roles": {
+        "value": {
+          "id": 11,
+          "concrete": "value",
+          "types": [
+            "_expression"
+          ]
+        }
+      },
+      "traits": []
+    },
+    {
+      "concrete": "source_file",
+      "semantic": "module",
+      "semantic_id": 1,
+      "roles": {
+        "body": {
+          "id": 2,
+          "concrete": "body",
+          "types": [
+            "_statement"
+          ]
+        }
+      },
+      "traits": [
+        {
+          "id": 2,
+          "name": "scope"
+        }
+      ]
+    },
+    {
+      "concrete": "table_constructor",
+      "semantic": "table",
+      "semantic_id": 16,
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "unary_expression",
+      "semantic": "operator",
+      "semantic_id": 18,
+      "roles": {
+        "right": {
+          "id": 8,
+          "concrete": "argument",
+          "types": [
+            "_expression"
+          ]
+        }
+      },
+      "traits": []
+    },
+    {
+      "concrete": "while_statement",
+      "semantic": "loop",
+      "semantic_id": 13,
+      "roles": {
+        "body": {
+          "id": 2,
+          "concrete": "body",
+          "types": [
+            "block"
+          ]
+        },
+        "condition": {
+          "id": 9,
+          "concrete": "condition",
+          "types": [
+            "_expression"
+          ]
+        }
+      },
+      "traits": []
+    }
+  ]
+}

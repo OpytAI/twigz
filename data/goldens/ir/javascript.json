@@ -1,0 +1,1493 @@
+{
+  "ir_version": 2,
+  "name": "javascript",
+  "version": "0.1.0",
+  "start": "program",
+  "rules": {
+    "arguments": {
+      "Sequence": [
+        {
+          "Literal": "("
+        },
+        {
+          "Choice": [
+            {
+              "Sequence": [
+                {
+                  "Symbol": "expression"
+                },
+                {
+                  "Repeat": {
+                    "Sequence": [
+                      {
+                        "Literal": ","
+                      },
+                      {
+                        "Symbol": "expression"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "Empty"
+          ]
+        },
+        {
+          "Literal": ")"
+        }
+      ]
+    },
+    "arrow_function": {
+      "Sequence": [
+        {
+          "Field": {
+            "name": "parameters",
+            "content": {
+              "Symbol": "parameters"
+            }
+          }
+        },
+        {
+          "Literal": "=>"
+        },
+        {
+          "Field": {
+            "name": "body",
+            "content": {
+              "Choice": [
+                {
+                  "Symbol": "block"
+                },
+                {
+                  "Symbol": "expression"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "binary_expression": {
+      "Choice": [
+        {
+          "Precedence": {
+            "associativity": "Left",
+            "value": {
+              "Integer": 1
+            },
+            "content": {
+              "Sequence": [
+                {
+                  "Field": {
+                    "name": "left",
+                    "content": {
+                      "Symbol": "expression"
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "operator",
+                    "content": {
+                      "Choice": [
+                        {
+                          "Literal": "||"
+                        },
+                        {
+                          "Literal": "??"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "right",
+                    "content": {
+                      "Symbol": "expression"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "Precedence": {
+            "associativity": "Left",
+            "value": {
+              "Integer": 2
+            },
+            "content": {
+              "Sequence": [
+                {
+                  "Field": {
+                    "name": "left",
+                    "content": {
+                      "Symbol": "expression"
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "operator",
+                    "content": {
+                      "Literal": "&&"
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "right",
+                    "content": {
+                      "Symbol": "expression"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "Precedence": {
+            "associativity": "Left",
+            "value": {
+              "Integer": 3
+            },
+            "content": {
+              "Sequence": [
+                {
+                  "Field": {
+                    "name": "left",
+                    "content": {
+                      "Symbol": "expression"
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "operator",
+                    "content": {
+                      "Choice": [
+                        {
+                          "Literal": "=="
+                        },
+                        {
+                          "Literal": "!="
+                        },
+                        {
+                          "Literal": "==="
+                        },
+                        {
+                          "Literal": "!=="
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "right",
+                    "content": {
+                      "Symbol": "expression"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "Precedence": {
+            "associativity": "Left",
+            "value": {
+              "Integer": 4
+            },
+            "content": {
+              "Sequence": [
+                {
+                  "Field": {
+                    "name": "left",
+                    "content": {
+                      "Symbol": "expression"
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "operator",
+                    "content": {
+                      "Choice": [
+                        {
+                          "Literal": "<"
+                        },
+                        {
+                          "Literal": ">"
+                        },
+                        {
+                          "Literal": "<="
+                        },
+                        {
+                          "Literal": ">="
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "right",
+                    "content": {
+                      "Symbol": "expression"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "Precedence": {
+            "associativity": "Left",
+            "value": {
+              "Integer": 5
+            },
+            "content": {
+              "Sequence": [
+                {
+                  "Field": {
+                    "name": "left",
+                    "content": {
+                      "Symbol": "expression"
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "operator",
+                    "content": {
+                      "Choice": [
+                        {
+                          "Literal": "+"
+                        },
+                        {
+                          "Literal": "-"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "right",
+                    "content": {
+                      "Symbol": "expression"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "Precedence": {
+            "associativity": "Left",
+            "value": {
+              "Integer": 6
+            },
+            "content": {
+              "Sequence": [
+                {
+                  "Field": {
+                    "name": "left",
+                    "content": {
+                      "Symbol": "expression"
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "operator",
+                    "content": {
+                      "Choice": [
+                        {
+                          "Literal": "*"
+                        },
+                        {
+                          "Symbol": "division"
+                        },
+                        {
+                          "Literal": "%"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "right",
+                    "content": {
+                      "Symbol": "expression"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "block": {
+      "Sequence": [
+        {
+          "Literal": "{"
+        },
+        {
+          "Field": {
+            "name": "body",
+            "content": {
+              "Repeat": {
+                "Symbol": "statement"
+              }
+            }
+          }
+        },
+        {
+          "Literal": "}"
+        }
+      ]
+    },
+    "block_comment": {
+      "Token": {
+        "Sequence": [
+          {
+            "Literal": "/*"
+          },
+          {
+            "Pattern": {
+              "value": "([^*]|\\*[^\\/])*",
+              "flags": ""
+            }
+          },
+          {
+            "Literal": "*/"
+          }
+        ]
+      }
+    },
+    "boolean": {
+      "Choice": [
+        {
+          "Literal": "true"
+        },
+        {
+          "Literal": "false"
+        }
+      ]
+    },
+    "call_expression": {
+      "Precedence": {
+        "associativity": "Left",
+        "value": {
+          "Integer": 15
+        },
+        "content": {
+          "Sequence": [
+            {
+              "Field": {
+                "name": "callee",
+                "content": {
+                  "Symbol": "expression"
+                }
+              }
+            },
+            {
+              "Field": {
+                "name": "arguments",
+                "content": {
+                  "Symbol": "arguments"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "class_body": {
+      "Sequence": [
+        {
+          "Literal": "{"
+        },
+        {
+          "Field": {
+            "name": "body",
+            "content": {
+              "Repeat": {
+                "Symbol": "method_definition"
+              }
+            }
+          }
+        },
+        {
+          "Literal": "}"
+        }
+      ]
+    },
+    "class_declaration": {
+      "Sequence": [
+        {
+          "Literal": "class"
+        },
+        {
+          "Field": {
+            "name": "name",
+            "content": {
+              "Symbol": "identifier"
+            }
+          }
+        },
+        {
+          "Choice": [
+            {
+              "Symbol": "heritage"
+            },
+            "Empty"
+          ]
+        },
+        {
+          "Field": {
+            "name": "body",
+            "content": {
+              "Symbol": "class_body"
+            }
+          }
+        }
+      ]
+    },
+    "export_from": {
+      "Sequence": [
+        {
+          "Literal": "export"
+        },
+        {
+          "Literal": "{"
+        },
+        {
+          "Symbol": "identifier"
+        },
+        {
+          "Literal": "}"
+        },
+        {
+          "Literal": "from"
+        },
+        {
+          "Field": {
+            "name": "source",
+            "content": {
+              "Symbol": "string"
+            }
+          }
+        }
+      ]
+    },
+    "expression": {
+      "Choice": [
+        {
+          "Literal": "this"
+        },
+        {
+          "Symbol": "boolean"
+        },
+        {
+          "Symbol": "null"
+        },
+        {
+          "Symbol": "number"
+        },
+        {
+          "Symbol": "string"
+        },
+        {
+          "Symbol": "identifier"
+        },
+        {
+          "Symbol": "arrow_function"
+        },
+        {
+          "Symbol": "template_literal"
+        },
+        {
+          "Symbol": "regex"
+        },
+        {
+          "Symbol": "parenthesized"
+        },
+        {
+          "Symbol": "member_expression"
+        },
+        {
+          "Symbol": "call_expression"
+        },
+        {
+          "Symbol": "binary_expression"
+        },
+        {
+          "Symbol": "unary_expression"
+        }
+      ]
+    },
+    "function_declaration": {
+      "Sequence": [
+        {
+          "Choice": [
+            {
+              "Literal": "async"
+            },
+            "Empty"
+          ]
+        },
+        {
+          "Literal": "function"
+        },
+        {
+          "Field": {
+            "name": "name",
+            "content": {
+              "Symbol": "identifier"
+            }
+          }
+        },
+        {
+          "Field": {
+            "name": "parameters",
+            "content": {
+              "Symbol": "parameters"
+            }
+          }
+        },
+        {
+          "Field": {
+            "name": "body",
+            "content": {
+              "Symbol": "block"
+            }
+          }
+        }
+      ]
+    },
+    "heritage": {
+      "Sequence": [
+        {
+          "Literal": "extends"
+        },
+        {
+          "Symbol": "identifier"
+        }
+      ]
+    },
+    "identifier": {
+      "Token": {
+        "Pattern": {
+          "value": "[A-Za-z_$][A-Za-z0-9_$]*",
+          "flags": ""
+        }
+      }
+    },
+    "import_clause": {
+      "Choice": [
+        {
+          "Symbol": "identifier"
+        },
+        {
+          "Symbol": "namespace_import"
+        },
+        {
+          "Symbol": "named_imports"
+        }
+      ]
+    },
+    "import_statement": {
+      "Sequence": [
+        {
+          "Literal": "import"
+        },
+        {
+          "Choice": [
+            {
+              "Sequence": [
+                {
+                  "Symbol": "import_clause"
+                },
+                {
+                  "Literal": "from"
+                }
+              ]
+            },
+            "Empty"
+          ]
+        },
+        {
+          "Field": {
+            "name": "source",
+            "content": {
+              "Symbol": "string"
+            }
+          }
+        }
+      ]
+    },
+    "line_comment": {
+      "Token": {
+        "Sequence": [
+          {
+            "Literal": "//"
+          },
+          {
+            "Pattern": {
+              "value": "[^\\n]*",
+              "flags": ""
+            }
+          }
+        ]
+      }
+    },
+    "member_expression": {
+      "Precedence": {
+        "associativity": "Left",
+        "value": {
+          "Integer": 14
+        },
+        "content": {
+          "Sequence": [
+            {
+              "Field": {
+                "name": "receiver",
+                "content": {
+                  "Symbol": "expression"
+                }
+              }
+            },
+            {
+              "Choice": [
+                {
+                  "Sequence": [
+                    {
+                      "Literal": "."
+                    },
+                    {
+                      "Field": {
+                        "name": "name",
+                        "content": {
+                          "Symbol": "identifier"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "Sequence": [
+                    {
+                      "Literal": "["
+                    },
+                    {
+                      "Symbol": "expression"
+                    },
+                    {
+                      "Literal": "]"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "method_definition": {
+      "Sequence": [
+        {
+          "Choice": [
+            {
+              "Literal": "async"
+            },
+            "Empty"
+          ]
+        },
+        {
+          "Field": {
+            "name": "name",
+            "content": {
+              "Symbol": "identifier"
+            }
+          }
+        },
+        {
+          "Field": {
+            "name": "parameters",
+            "content": {
+              "Symbol": "parameters"
+            }
+          }
+        },
+        {
+          "Field": {
+            "name": "body",
+            "content": {
+              "Symbol": "block"
+            }
+          }
+        }
+      ]
+    },
+    "named_arrow_function": {
+      "Precedence": {
+        "associativity": "Left",
+        "value": {
+          "Integer": 16
+        },
+        "content": {
+          "Sequence": [
+            {
+              "Choice": [
+                {
+                  "Literal": "const"
+                },
+                {
+                  "Literal": "let"
+                },
+                {
+                  "Literal": "var"
+                }
+              ]
+            },
+            {
+              "Field": {
+                "name": "name",
+                "content": {
+                  "Symbol": "identifier"
+                }
+              }
+            },
+            {
+              "Literal": "="
+            },
+            {
+              "Field": {
+                "name": "parameters",
+                "content": {
+                  "Symbol": "parameters"
+                }
+              }
+            },
+            {
+              "Literal": "=>"
+            },
+            {
+              "Field": {
+                "name": "body",
+                "content": {
+                  "Choice": [
+                    {
+                      "Symbol": "block"
+                    },
+                    {
+                      "Symbol": "expression"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "named_imports": {
+      "Sequence": [
+        {
+          "Literal": "{"
+        },
+        {
+          "Choice": [
+            {
+              "Sequence": [
+                {
+                  "Symbol": "identifier"
+                },
+                {
+                  "Repeat": {
+                    "Sequence": [
+                      {
+                        "Literal": ","
+                      },
+                      {
+                        "Symbol": "identifier"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "Empty"
+          ]
+        },
+        {
+          "Literal": "}"
+        }
+      ]
+    },
+    "namespace_import": {
+      "Sequence": [
+        {
+          "Literal": "*"
+        },
+        {
+          "Literal": "as"
+        },
+        {
+          "Symbol": "identifier"
+        }
+      ]
+    },
+    "null": {
+      "Literal": "null"
+    },
+    "number": {
+      "Token": {
+        "Pattern": {
+          "value": "0[xX][0-9A-Fa-f]+|[0-9]+(\\.[0-9]+)?([eE][+-]?[0-9]+)?",
+          "flags": ""
+        }
+      }
+    },
+    "parameter": {
+      "Field": {
+        "name": "name",
+        "content": {
+          "Symbol": "identifier"
+        }
+      }
+    },
+    "parameters": {
+      "Sequence": [
+        {
+          "Literal": "("
+        },
+        {
+          "Choice": [
+            {
+              "Sequence": [
+                {
+                  "Symbol": "parameter"
+                },
+                {
+                  "Repeat": {
+                    "Sequence": [
+                      {
+                        "Literal": ","
+                      },
+                      {
+                        "Symbol": "parameter"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "Empty"
+          ]
+        },
+        {
+          "Literal": ")"
+        }
+      ]
+    },
+    "parenthesized": {
+      "Sequence": [
+        {
+          "Literal": "("
+        },
+        {
+          "Symbol": "expression"
+        },
+        {
+          "Literal": ")"
+        }
+      ]
+    },
+    "program": {
+      "Field": {
+        "name": "body",
+        "content": {
+          "Repeat": {
+            "Symbol": "statement"
+          }
+        }
+      }
+    },
+    "return_statement": {
+      "Sequence": [
+        {
+          "Literal": "return"
+        },
+        {
+          "Symbol": "expression"
+        }
+      ]
+    },
+    "statement": {
+      "Choice": [
+        {
+          "Sequence": [
+            {
+              "Symbol": "function_declaration"
+            },
+            {
+              "Choice": [
+                {
+                  "Literal": ";"
+                },
+                "Empty"
+              ]
+            }
+          ]
+        },
+        {
+          "Sequence": [
+            {
+              "Symbol": "named_arrow_function"
+            },
+            {
+              "Choice": [
+                {
+                  "Literal": ";"
+                },
+                "Empty"
+              ]
+            }
+          ]
+        },
+        {
+          "Sequence": [
+            {
+              "Symbol": "class_declaration"
+            },
+            {
+              "Choice": [
+                {
+                  "Literal": ";"
+                },
+                "Empty"
+              ]
+            }
+          ]
+        },
+        {
+          "Sequence": [
+            {
+              "Symbol": "import_statement"
+            },
+            {
+              "Choice": [
+                {
+                  "Literal": ";"
+                },
+                "Empty"
+              ]
+            }
+          ]
+        },
+        {
+          "Sequence": [
+            {
+              "Symbol": "export_from"
+            },
+            {
+              "Choice": [
+                {
+                  "Literal": ";"
+                },
+                "Empty"
+              ]
+            }
+          ]
+        },
+        {
+          "Sequence": [
+            {
+              "Symbol": "return_statement"
+            },
+            {
+              "Choice": [
+                {
+                  "Literal": ";"
+                },
+                "Empty"
+              ]
+            }
+          ]
+        },
+        {
+          "Sequence": [
+            {
+              "Symbol": "variable_declaration"
+            },
+            {
+              "Choice": [
+                {
+                  "Literal": ";"
+                },
+                "Empty"
+              ]
+            }
+          ]
+        },
+        {
+          "Sequence": [
+            {
+              "Symbol": "block"
+            },
+            {
+              "Choice": [
+                {
+                  "Literal": ";"
+                },
+                "Empty"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "string": {
+      "Token": {
+        "Pattern": {
+          "value": "\"([^\"\\\\]|\\\\.)*\"|'([^'\\\\]|\\\\.)*'",
+          "flags": ""
+        }
+      }
+    },
+    "template_literal": {
+      "Sequence": [
+        {
+          "Symbol": "template_head"
+        },
+        {
+          "Choice": [
+            {
+              "Sequence": [
+                {
+                  "Repeat": {
+                    "Sequence": [
+                      {
+                        "Symbol": "expression"
+                      },
+                      {
+                        "Symbol": "template_middle"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Choice": [
+                    {
+                      "Symbol": "expression"
+                    },
+                    "Empty"
+                  ]
+                },
+                {
+                  "Symbol": "template_tail"
+                }
+              ]
+            },
+            "Empty"
+          ]
+        }
+      ]
+    },
+    "unary_expression": {
+      "Precedence": {
+        "associativity": "Right",
+        "value": {
+          "Integer": 13
+        },
+        "content": {
+          "Sequence": [
+            {
+              "Field": {
+                "name": "operator",
+                "content": {
+                  "Choice": [
+                    {
+                      "Literal": "!"
+                    },
+                    {
+                      "Literal": "-"
+                    },
+                    {
+                      "Literal": "typeof"
+                    },
+                    {
+                      "Literal": "void"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Field": {
+                "name": "argument",
+                "content": {
+                  "Symbol": "expression"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "variable_declaration": {
+      "Sequence": [
+        {
+          "Choice": [
+            {
+              "Literal": "const"
+            },
+            {
+              "Literal": "let"
+            },
+            {
+              "Literal": "var"
+            }
+          ]
+        },
+        {
+          "Field": {
+            "name": "name",
+            "content": {
+              "Symbol": "identifier"
+            }
+          }
+        },
+        {
+          "Literal": "="
+        },
+        {
+          "Field": {
+            "name": "value",
+            "content": {
+              "Symbol": "expression"
+            }
+          }
+        }
+      ]
+    },
+    "whitespace": {
+      "Token": {
+        "Pattern": {
+          "value": "[\\t\\n\\r ]+",
+          "flags": ""
+        }
+      }
+    }
+  },
+  "extras": [
+    {
+      "Symbol": "whitespace"
+    },
+    {
+      "Symbol": "line_comment"
+    },
+    {
+      "Symbol": "block_comment"
+    }
+  ],
+  "externals": [
+    {
+      "Symbol": "template_head"
+    },
+    {
+      "Symbol": "template_middle"
+    },
+    {
+      "Symbol": "template_tail"
+    },
+    {
+      "Symbol": "regex"
+    },
+    {
+      "Symbol": "division"
+    }
+  ],
+  "inline": [],
+  "supertypes": [],
+  "word": "identifier",
+  "conflicts": [
+    [
+      "expression",
+      "statement"
+    ],
+    [
+      "expression",
+      "parameter"
+    ],
+    [
+      "member_expression",
+      "call_expression"
+    ],
+    [
+      "named_arrow_function",
+      "variable_declaration"
+    ],
+    [
+      "named_arrow_function",
+      "arrow_function"
+    ],
+    [
+      "template_literal"
+    ],
+    [
+      "template_literal",
+      "expression"
+    ]
+  ],
+  "precedences": [],
+  "semantic": [
+    {
+      "concrete": "arrow_function",
+      "semantic": "function",
+      "roles": {
+        "body": "body",
+        "parameters": "parameters"
+      },
+      "traits": [
+        "scope"
+      ]
+    },
+    {
+      "concrete": "binary_expression",
+      "semantic": "operator",
+      "roles": {
+        "left": "left",
+        "right": "right"
+      },
+      "traits": []
+    },
+    {
+      "concrete": "block",
+      "semantic": "block",
+      "roles": {
+        "body": "body"
+      },
+      "traits": [
+        "scope"
+      ]
+    },
+    {
+      "concrete": "block_comment",
+      "semantic": "comment",
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "boolean",
+      "semantic": "literal",
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "call_expression",
+      "semantic": "call",
+      "roles": {
+        "arguments": "arguments",
+        "callee": "callee"
+      },
+      "traits": []
+    },
+    {
+      "concrete": "class_body",
+      "semantic": "block",
+      "roles": {
+        "body": "body"
+      },
+      "traits": [
+        "scope"
+      ]
+    },
+    {
+      "concrete": "class_declaration",
+      "semantic": "class",
+      "roles": {
+        "body": "body",
+        "name": "name"
+      },
+      "traits": [
+        "declaration",
+        "scope"
+      ]
+    },
+    {
+      "concrete": "export_from",
+      "semantic": "import",
+      "roles": {
+        "source": "source"
+      },
+      "traits": [
+        "declaration"
+      ]
+    },
+    {
+      "concrete": "function_declaration",
+      "semantic": "function",
+      "roles": {
+        "body": "body",
+        "name": "name",
+        "parameters": "parameters"
+      },
+      "traits": [
+        "declaration",
+        "scope"
+      ]
+    },
+    {
+      "concrete": "identifier",
+      "semantic": "identifier",
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "import_statement",
+      "semantic": "import",
+      "roles": {
+        "source": "source"
+      },
+      "traits": [
+        "declaration"
+      ]
+    },
+    {
+      "concrete": "line_comment",
+      "semantic": "comment",
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "member_expression",
+      "semantic": "member",
+      "roles": {
+        "name": "name",
+        "receiver": "receiver"
+      },
+      "traits": []
+    },
+    {
+      "concrete": "method_definition",
+      "semantic": "function",
+      "roles": {
+        "body": "body",
+        "name": "name",
+        "parameters": "parameters"
+      },
+      "traits": [
+        "declaration",
+        "scope"
+      ]
+    },
+    {
+      "concrete": "named_arrow_function",
+      "semantic": "function",
+      "roles": {
+        "body": "body",
+        "name": "name",
+        "parameters": "parameters"
+      },
+      "traits": [
+        "declaration",
+        "scope"
+      ]
+    },
+    {
+      "concrete": "null",
+      "semantic": "literal",
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "number",
+      "semantic": "literal",
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "parameter",
+      "semantic": "parameter",
+      "roles": {
+        "name": "name"
+      },
+      "traits": [
+        "declaration"
+      ]
+    },
+    {
+      "concrete": "program",
+      "semantic": "module",
+      "roles": {
+        "body": "body"
+      },
+      "traits": [
+        "scope"
+      ]
+    },
+    {
+      "concrete": "return_statement",
+      "semantic": "return",
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "string",
+      "semantic": "string",
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "template_literal",
+      "semantic": "string",
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "unary_expression",
+      "semantic": "operator",
+      "roles": {
+        "right": "argument"
+      },
+      "traits": []
+    },
+    {
+      "concrete": "variable_declaration",
+      "semantic": "declaration",
+      "roles": {
+        "name": "name"
+      },
+      "traits": [
+        "declaration"
+      ]
+    }
+  ],
+  "scans": [
+    {
+      "machine": "Slash",
+      "regex": "regex",
+      "division": "division"
+    },
+    {
+      "machine": "Template",
+      "open": "template_head",
+      "close": "template_tail",
+      "chunk": "template_middle"
+    }
+  ]
+}
