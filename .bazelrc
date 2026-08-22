@@ -17,6 +17,5 @@ test --test_output=errors
 # BCR only for now.
 common --registry=https://bcr.bazel.build/
 
-# Optional machine-specific overrides (gitignored). Use this file to set an
-# alternate output_user_root when Bazel's platform default is not suitable.
+# Machine-local output-root placement belongs in this ignored file.
 try-import %workspace%/user.bazelrc

@@ -42,12 +42,10 @@ toolchain. Do not use the system `CC`. Do not use `cargo test` as the gate.
 
 ### Bazel output root
 
-Use Bazel's platform default output root unless the local filesystem requires
-a different location. Do not commit a machine-specific output path.
+Do not commit a machine-specific output path.
 
-Set a local output root in `user.bazelrc` when necessary. This file is ignored
-by Git. Use an absolute path so Bazel commands from workspace subdirectories
-use the same location.
+Set the output root in ignored `user.bazelrc`. Use an absolute path. Do not
+leave Bazel output under `/tmp` or `~/.cache/bazel`.
 
 ```bazelrc
 startup --output_user_root=/mnt/workspace/opytai/twigz/bazel-cache

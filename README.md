@@ -74,8 +74,8 @@ Useful targets:
 | `//tools/fmt:twigz-fmt` | Format `.grammar` files |
 | `//tools/query:twigz-query` | Run a query |
 
-The repository `.bazelrc` selects hermetic build settings. Set a local
-output root in ignored `user.bazelrc` if the platform default is too small.
+The repository `.bazelrc` selects hermetic build settings. Set the Bazel
+output root in the ignored `user.bazelrc` file.
 
 ## Project status
 
