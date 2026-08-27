@@ -1,26 +1,29 @@
-load("@rules_cc//cc:defs.bzl", "cc_binary")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
-load("//bazel:wasi.bzl", "wasi_binary")
+load("//bazel:cc.bzl", "zig_c_wasm")
 
 package(default_visibility = ["//visibility:public"])
 
-cc_binary(
-    name = "wasi_parse_c",
-    srcs = ["wasi_parse.c"],
+zig_c_wasm(
+    name = "wasi_parse_wasm",
+    srcs = [
+        "wasi_parse.c",
+        "//grammars:parser_csrcs",
+        "//grammars:scanners",
+        "@tree_sitter//:runtime_c",
+    ],
     copts = [
         "-std=c11",
-        "-fPIC",
+        "-D_POSIX_C_SOURCE=200112L",
+        "-D_DEFAULT_SOURCE",
     ],
-    deps = ["//grammars:langs_c"],
-    target_compatible_with = [
-        "@platforms//cpu:wasm32",
-        "@platforms//os:wasi",
+    extra_srcs = [
+        "@tree_sitter//:runtime_support",
+        "@tree_sitter//:runtime_header_files",
     ],
-)
-
-wasi_binary(
-    name = "wasi_parse_wasm",
-    bin = ":wasi_parse_c",
+    linkopts = ["-lc"],
+    out = "wasi_parse_wasm.wasm",
+    target = "wasm32-wasi",
+    deps = ["@tree_sitter//:headers"],
 )
 
 sh_test(

@@ -1,5 +1,5 @@
 # twigz build configuration.
-# Hermetic Rust (rules_rust 0.70) and hermetic C (hermetic_cc_toolchain).
+# Hermetic Rust (rules_rust 0.70). C is compiled with rules_zig zig cc.
 
 # Bzlmod only — no legacy WORKSPACE.
 common --enable_workspace=false

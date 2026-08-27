@@ -1,6 +1,7 @@
 # Bazel
 /bazel-*
 /bazel-cache/
+/zig-cache/
 user.bazelrc
 
 # Rust

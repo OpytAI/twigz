@@ -11,8 +11,8 @@ kinds, not concrete node names.
 - Keep the vocabulary in this repository (kinds 1–22).
 - Keep pack outputs as `registry.json` and `registry.rs`. Do not emit Zig.
 - Keep production libraries independent of test-only packages.
-- Native `Parser` embeds. `wasm32-wasip1` is the C target
-  `//examples/wasi-parse:wasi_parse_wasm`.
+- Native `Parser` embeds. `wasm32-wasi` is the C target
+  `//examples/wasi-parse:wasi_parse_wasm` (zig cc).
 
 ## Dependency direction
 

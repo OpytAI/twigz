@@ -1,5 +1,5 @@
-load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@twigz//bazel:cc.bzl", "cc_headers", "zig_c_archive")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -56,33 +56,29 @@ filegroup(
     ),
 )
 
-cc_library(
+cc_headers(
     name = "headers",
-    hdrs = [
-        "lib/include/tree_sitter/api.h",
-        "lib/src/parser.h",
-    ],
+    hdrs = [":runtime_header_files"],
     includes = [
         "lib/include",
         "lib/src",
     ],
-    textual_hdrs = glob(
-        ["lib/src/**"],
-        exclude = ["lib/src/lib.c"],
-    ),
 )
 
-cc_library(
+zig_c_archive(
     name = "runtime",
-    srcs = ["lib/src/lib.c"],
+    srcs = [":runtime_c"],
     copts = [
         "-std=c11",
         "-fPIC",
         "-D_POSIX_C_SOURCE=200112L",
         "-D_DEFAULT_SOURCE",
     ],
+    extra_srcs = [
+        ":runtime_support",
+        ":runtime_header_files",
+    ],
     deps = [":headers"],
-    alwayslink = True,
 )
 
 exports_files(["LICENSE"])

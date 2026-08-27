@@ -1,5 +1,5 @@
-load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
+load("//bazel:cc.bzl", "zig_c_archive")
 load("//bazel:grammar.bzl", "twigz_grammar", "twigz_language_cdylib", "twigz_pack")
 
 package(default_visibility = ["//visibility:public"])
@@ -89,36 +89,39 @@ filegroup(
     output_group = "scanners",
 )
 
-cc_library(
+_C_COPTS = [
+    "-std=c11",
+    "-fPIC",
+    "-D_POSIX_C_SOURCE=200112L",
+    "-D_DEFAULT_SOURCE",
+]
+
+zig_c_archive(
     name = "ts_c",
     srcs = ["@tree_sitter//:runtime_c"],
-    copts = [
-        "-std=c11",
-        "-fPIC",
-        "-D_POSIX_C_SOURCE=200112L",
-        "-D_DEFAULT_SOURCE",
+    copts = _C_COPTS,
+    extra_srcs = [
+        "@tree_sitter//:runtime_support",
+        "@tree_sitter//:runtime_header_files",
     ],
     deps = ["@tree_sitter//:headers"],
-    alwayslink = True,
 )
 
-cc_library(
+zig_c_archive(
     name = "langs_c",
     srcs = [
         ":parser_csrcs",
         ":scanners",
     ],
-    copts = [
-        "-std=c11",
-        "-fPIC",
-        "-D_POSIX_C_SOURCE=200112L",
-        "-D_DEFAULT_SOURCE",
+    copts = _C_COPTS,
+    extra_srcs = [
+        "@tree_sitter//:runtime_support",
+        "@tree_sitter//:runtime_header_files",
     ],
     deps = [
         ":ts_c",
         "@tree_sitter//:headers",
     ],
-    alwayslink = True,
 )
 
 twigz_language_cdylib(

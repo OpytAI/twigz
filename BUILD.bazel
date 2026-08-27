@@ -6,6 +6,7 @@ exports_files([
     "LICENSE",
     "NOTICE",
     "TREE_SITTER_PIN.md",
+    "zig_index.json",
 ])
 
 alias(

@@ -10,14 +10,17 @@ bazel_dep(name = "bazel_skylib", version = "1.9.0")
 bazel_dep(name = "rules_rust", version = "0.70.0")
 bazel_dep(name = "rules_cc", version = "0.2.18")
 bazel_dep(name = "rules_shell", version = "0.6.1")
-bazel_dep(name = "hermetic_cc_toolchain", version = "4.2.0")
+bazel_dep(name = "rules_zig", version = "0.16.0")
 
-hermetic_cc = use_extension("@hermetic_cc_toolchain//toolchain:ext.bzl", "toolchains")
-use_repo(hermetic_cc, "zig_sdk")
+zig = use_extension("@rules_zig//zig:extensions.bzl", "zig")
+zig.index(file = "//:zig_index.json")
+zig.toolchain(zig_version = "0.16.0")
+use_repo(zig, "zig_toolchains")
 
 register_toolchains(
-    "@zig_sdk//toolchain/...",
-    "@zig_sdk//libc_aware/toolchain/...",
+    "@rules_zig//zig/target:all",
+    "@zig_toolchains//:all",
+    "//platforms:wasm32_wasi_zig_toolchain",
 )
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")

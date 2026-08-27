@@ -15,7 +15,7 @@ and deterministic. Do not use the network or the host C compiler.
 | Packed parse | `crates/runtime` | `//crates/runtime:runtime_test` |
 | cdylib load | `crates/runtime/load_test.rs` | `//crates/runtime:load_test` |
 | Formatter | `grammars/format_test.sh` | `//grammars:format_test` |
-| wasm32-wasip1 C parse | `examples/wasi-parse` | `//examples/wasi-parse:wasi_parse_test` (x86_64-linux wasmtime) |
+| wasm32-wasi C parse | `examples/wasi-parse` | `//examples/wasi-parse:wasi_parse_test` (x86_64-linux wasmtime) |
 
 Production `rust_library` targets must not depend on test-only packages.
 

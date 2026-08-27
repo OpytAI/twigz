@@ -1,6 +1,6 @@
 """Hermetic .grammar -> generated parser artifacts."""
 
-load("@rules_cc//cc:defs.bzl", "cc_binary")
+load("//bazel:cc.bzl", "zig_c_shared")
 
 TwigzGrammarInfo = provider(
     fields = {
@@ -189,7 +189,7 @@ def twigz_language_cdylib(name, grammar, soname, visibility = None):
         srcs = [":" + pack_name],
         output_group = "glues",
     )
-    cc_binary(
+    zig_c_shared(
         name = name,
         srcs = [
             ":" + name + "_csrcs",
@@ -203,9 +203,13 @@ def twigz_language_cdylib(name, grammar, soname, visibility = None):
             "-D_POSIX_C_SOURCE=200112L",
             "-D_DEFAULT_SOURCE",
         ],
+        extra_srcs = [
+            "@tree_sitter//:runtime_support",
+            "@tree_sitter//:runtime_header_files",
+        ],
         linkopts = ["-Wl,-soname," + soname] if soname else [],
+        out = soname if soname else name + ".so",
         deps = ["@tree_sitter//:headers"],
-        linkshared = True,
         visibility = visibility,
     )
     native.filegroup(

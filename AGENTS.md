@@ -37,8 +37,8 @@ an untracked tip. Record `ABI_VERSION_MAX` from the fetched crate.
 
 ## Build system
 
-Build and test only with **Bazel** and **rules_rust**. Use the hermetic C
-toolchain. Do not use the system `CC`. Do not use `cargo test` as the gate.
+Build and test only with **Bazel**, **rules_rust**, and **rules_zig** zig cc.
+Do not use the system `CC`. Do not use `cargo test` as the gate.
 
 ### Bazel output root
 
