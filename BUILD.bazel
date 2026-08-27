@@ -26,3 +26,27 @@ alias(
     actual = "//crates/query",
     visibility = ["//visibility:public"],
 )
+
+alias(
+    name = "tree_sitter_runtime_c",
+    actual = "@tree_sitter//:runtime_c",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "tree_sitter_runtime_support",
+    actual = "@tree_sitter//:runtime_support",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "tree_sitter_runtime_header_files",
+    actual = "@tree_sitter//:runtime_header_files",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "tree_sitter_headers",
+    actual = "@tree_sitter//:headers",
+    visibility = ["//visibility:public"],
+)

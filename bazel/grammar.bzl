@@ -68,7 +68,7 @@ twigz_grammar = rule(
         "modules": attr.label_keyed_string_dict(allow_files = [".grammar"]),
         "language": attr.string(mandatory = True),
         "_generator": attr.label(
-            default = "//tools/grammar-gen:twigz-grammar-gen",
+            default = Label("//tools/grammar-gen:twigz-grammar-gen"),
             executable = True,
             cfg = "exec",
         ),
@@ -161,7 +161,7 @@ twigz_pack = rule(
     attrs = {
         "grammars": attr.label_list(providers = [TwigzGrammarInfo], mandatory = True),
         "_packer": attr.label(
-            default = "//tools/pack:twigz-pack",
+            default = Label("//tools/pack:twigz-pack"),
             executable = True,
             cfg = "exec",
         ),
