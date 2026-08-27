@@ -8,7 +8,7 @@ rust_library(
     crate_name = "twigz_vocab",
     edition = "2021",
     deps = [
-        "@crates//:serde"
+        "@twigz_crates//:serde"
     ],
 )
 

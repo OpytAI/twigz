@@ -10,7 +10,7 @@ rust_library(
     deps = [
         "//crates/runtime",
         "//crates/vocab",
-        "@crates//:regex",
+        "@twigz_crates//:regex",
     ],
 )
 
@@ -31,6 +31,6 @@ rust_test(
         ":query",
         "//crates/runtime",
         "//crates/vocab",
-        "@crates//:serde_json",
+        "@twigz_crates//:serde_json",
     ],
 )

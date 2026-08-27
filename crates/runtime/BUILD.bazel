@@ -10,8 +10,8 @@ rust_library(
     deps = [
         "//crates/vocab",
         "//grammars:ts_c",
-        "@crates//:libloading",
-        "@crates//:serde_json",
+        "@twigz_crates//:libloading",
+        "@twigz_crates//:serde_json",
     ],
 )
 
@@ -26,8 +26,8 @@ rust_library(
         "//crates/vocab",
         "//grammars:langs_c",
         "//grammars:ts_c",
-        "@crates//:libloading",
-        "@crates//:serde_json",
+        "@twigz_crates//:libloading",
+        "@twigz_crates//:serde_json",
     ],
 )
 

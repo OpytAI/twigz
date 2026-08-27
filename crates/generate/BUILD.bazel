@@ -14,7 +14,7 @@ rust_library(
         "//crates/ir",
         "//crates/scan",
         "//crates/vocab",
-        "@crates//:serde_json",
+        "@twigz_crates//:serde_json",
         "@tree_sitter//:generate",
     ],
 )
@@ -35,7 +35,7 @@ rust_test(
         "//crates/dsl",
         "//crates/elaborate",
         "//crates/ir",
-        "@crates//:serde_json",
+        "@twigz_crates//:serde_json",
         "@tree_sitter//:generate",
     ],
 )
@@ -47,6 +47,6 @@ rust_binary(
     edition = "2021",
     deps = [
         ":generate",
-        "@crates//:serde_json",
+        "@twigz_crates//:serde_json",
     ],
 )
