@@ -59,7 +59,10 @@ filegroup(
 cc_headers(
     name = "headers",
     hdrs = ["lib/include/tree_sitter/api.h"],
-    includes = ["lib/include"],
+    includes = [
+        "lib/include",
+        "lib/src",
+    ],
 )
 
 cc_headers(
