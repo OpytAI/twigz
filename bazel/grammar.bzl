@@ -209,7 +209,10 @@ def twigz_language_cdylib(name, grammar, soname, visibility = None):
         ],
         linkopts = ["-Wl,-soname," + soname] if soname else [],
         out = soname if soname else name + ".so",
-        deps = ["@tree_sitter//:headers"],
+        deps = [
+            "@tree_sitter//:headers",
+            "@tree_sitter//:parser_headers",
+        ],
         visibility = visibility,
     )
     native.filegroup(

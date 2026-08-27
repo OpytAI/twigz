@@ -104,7 +104,10 @@ zig_c_archive(
         "@tree_sitter//:runtime_support",
         "@tree_sitter//:runtime_header_files",
     ],
-    deps = ["@tree_sitter//:headers"],
+    deps = [
+        "@tree_sitter//:headers",
+        "@tree_sitter//:parser_headers",
+    ],
 )
 
 zig_c_archive(
@@ -121,6 +124,7 @@ zig_c_archive(
     deps = [
         ":ts_c",
         "@tree_sitter//:headers",
+        "@tree_sitter//:parser_headers",
     ],
 )
 

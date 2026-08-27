@@ -23,7 +23,10 @@ zig_c_wasm(
     linkopts = ["-lc"],
     out = "wasi_parse_wasm.wasm",
     target = "wasm32-wasi",
-    deps = ["@tree_sitter//:headers"],
+    deps = [
+        "@tree_sitter//:headers",
+        "@tree_sitter//:parser_headers",
+    ],
 )
 
 sh_test(

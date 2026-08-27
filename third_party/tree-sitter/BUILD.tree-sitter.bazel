@@ -58,11 +58,14 @@ filegroup(
 
 cc_headers(
     name = "headers",
-    hdrs = [":runtime_header_files"],
-    includes = [
-        "lib/include",
-        "lib/src",
-    ],
+    hdrs = ["lib/include/tree_sitter/api.h"],
+    includes = ["lib/include"],
+)
+
+cc_headers(
+    name = "parser_headers",
+    hdrs = ["lib/src/parser.h"],
+    includes = ["lib/src"],
 )
 
 zig_c_archive(
@@ -78,7 +81,10 @@ zig_c_archive(
         ":runtime_support",
         ":runtime_header_files",
     ],
-    deps = [":headers"],
+    deps = [
+        ":headers",
+        ":parser_headers",
+    ],
 )
 
 exports_files(["LICENSE"])
