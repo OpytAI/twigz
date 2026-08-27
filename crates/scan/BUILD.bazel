@@ -17,7 +17,6 @@ rust_test(
     srcs = ["scan_test.rs"],
     crate_name = "twigz_scan_test",
     compile_data = [
-        "//data:fixtures",
         "//grammars:grammar_files",
     ],
     edition = "2021",

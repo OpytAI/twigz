@@ -1,7 +1,9 @@
 # Testing conventions
 
 twigz tests are Bazel `rust_test` and `sh_test` targets. Keep tests hermetic
-and deterministic. Do not use the network or the host C compiler.
+and deterministic. Do not use the network or the host C compiler. Scanner
+behavior is the packed Tree-sitter language (`//crates/runtime:runtime_test`).
+Do not drive a second in-process lexer.
 
 ## Layout
 
@@ -10,7 +12,7 @@ and deterministic. Do not use the network or the host C compiler.
 | DSL / elaborate / format | `crates/dsl/dsl_test.rs` | `//crates/dsl:dsl_test` |
 | Vocabulary | `crates/vocab` | `//crates/vocab:vocab_test` |
 | IR / semantics goldens | `data/goldens/{ir,semantics,snapshot}` | `//crates/generate:golden_test` |
-| Scanner contract | `crates/scan` | `//crates/scan:scan_test` |
+| Scanner classify / emit C | `crates/scan` | `//crates/scan:scan_test` |
 | Structured / S-expr queries | `crates/query` | `//crates/query:query_test` |
 | Packed parse | `crates/runtime` | `//crates/runtime:runtime_test` |
 | cdylib load | `crates/runtime/load_test.rs` | `//crates/runtime:load_test` |

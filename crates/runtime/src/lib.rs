@@ -109,6 +109,7 @@ extern "C" {
     pub fn ts_node_field_name_for_child(node: TSNode, index: u32) -> *const std::os::raw::c_char;
     pub fn ts_node_is_named(node: TSNode) -> bool;
     pub fn ts_node_is_null(node: TSNode) -> bool;
+    pub fn ts_node_has_error(node: TSNode) -> bool;
     pub fn ts_node_parent(node: TSNode) -> TSNode;
     pub fn ts_node_descendant_for_byte_range(node: TSNode, start: u32, end: u32) -> TSNode;
     pub fn ts_query_new(
@@ -435,6 +436,10 @@ impl Tree {
         Node {
             raw: unsafe { ts_tree_root_node(self.raw) },
         }
+    }
+
+    pub fn has_error(&self) -> bool {
+        unsafe { ts_node_has_error(self.root().raw) }
     }
 
     pub fn node_at(&self, byte: u32) -> Node {

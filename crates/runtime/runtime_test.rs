@@ -105,6 +105,45 @@ fn lua_finds_functions_and_strings() {
 }
 
 #[test]
+fn lua_closed_long_brackets_parse_without_error() {
+    let source = include_str!("../../data/fixtures/source/lua/closed_long_brackets.lua");
+    let tree = parse(lua_lang(), source);
+    assert!(
+        !tree.has_error(),
+        "closed long brackets must be a clean tree: {}",
+        tree.text(tree.root())
+    );
+    let strings: Vec<_> = tree
+        .find(Kind::STRING)
+        .map(|node| tree.text(node).to_string())
+        .collect();
+    assert!(
+        strings.iter().any(|text| text == "[[hello]]"),
+        "{strings:?}"
+    );
+    assert!(
+        strings.iter().any(|text| text.contains("hello")),
+        "{strings:?}"
+    );
+    assert!(
+        strings.iter().any(|text| text.contains("more")),
+        "{strings:?}"
+    );
+    assert!(
+        strings.iter().any(|text| text.contains("a]b")),
+        "closer-in-content missing: {strings:?}"
+    );
+    let comments: Vec<_> = tree
+        .find(Kind::COMMENT)
+        .map(|node| tree.text(node).to_string())
+        .collect();
+    assert!(
+        comments.iter().any(|text| text.contains("long comment")),
+        "{comments:?}"
+    );
+}
+
+#[test]
 fn lua_parses_long_brackets_through_packed_scanner() {
     let source = include_str!("../../data/fixtures/source/lua/long_brackets.lua");
     let tree = parse(lua_lang(), source);
@@ -379,6 +418,7 @@ fn incremental_edit_inside_long_string() {
     let edited = "local s = [=[hallo]=]\n";
     let mut parser = Parser::new(lua_lang()).unwrap();
     let mut tree = parser.parse_str(source).unwrap();
+    assert!(!tree.has_error(), "source long string tree has errors");
     tree.edit(TSInputEdit {
         start_byte: 14,
         old_end_byte: 15,
@@ -396,4 +436,5 @@ fn incremental_edit_inside_long_string() {
         strings.iter().any(|text| text.contains("hallo")),
         "{strings:?}"
     );
+    assert!(!tree.has_error(), "edited long string tree has errors");
 }

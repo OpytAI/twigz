@@ -1,23 +1,10 @@
 //! Lower `scan` rules to a matcher and to Tree-sitter’s five C symbols.
+//!
+//! The packed Tree-sitter scanner is the only scan implementation. This crate
+//! classifies `.grammar` scan rules and emits that C. It does not interpret
+//! tokens in Rust.
 
 use twigz_ir::{GrammarIr, ScanExpr, ScanRule};
-
-pub const SERIALIZE_CAP: usize = 1024;
-const OFFSIDE_STACK: usize = 32;
-
-pub trait Lexer {
-    fn lookahead(&self) -> i32;
-    fn advance(&mut self, skip: bool);
-    fn mark_end(&mut self);
-    fn column(&self) -> u32;
-    fn eof(&self) -> bool;
-}
-
-pub trait Scanner: Send {
-    fn scan(&mut self, lexer: &mut dyn Lexer, valid: &[bool]) -> bool;
-    fn serialize(&self, buf: &mut [u8]) -> usize;
-    fn deserialize(&mut self, buf: &[u8]);
-}
 
 #[derive(Clone, Debug)]
 pub struct GeneratedScanner {
@@ -33,8 +20,6 @@ pub enum MachineKind {
         content: usize,
         end: usize,
         comment: Option<usize>,
-        equals: u8,
-        in_string: bool,
     },
     Offside {
         tab_width: u8,
@@ -46,9 +31,6 @@ pub enum MachineKind {
         dedent: usize,
         interp_open: Option<usize>,
         interp_close: Option<usize>,
-        stack: Vec<u8>,
-        pending_dedents: u8,
-        in_interp: bool,
     },
     SlashTemplate {
         regex: Option<usize>,
@@ -56,7 +38,6 @@ pub enum MachineKind {
         open: Option<usize>,
         close: Option<usize>,
         middle: Option<usize>,
-        in_interp: bool,
     },
     Empty,
 }
@@ -322,8 +303,6 @@ impl GeneratedScanner {
                 content: layout.content,
                 end: layout.end,
                 comment: layout.comment,
-                equals: 0,
-                in_string: false,
             }
         } else if let Some(ScanRule::Indent {
             tab_width,
@@ -355,9 +334,6 @@ impl GeneratedScanner {
                 dedent: required_index(&externals, dedent, &grammar.name)?,
                 interp_open,
                 interp_close,
-                stack: vec![0],
-                pending_dedents: 0,
-                in_interp: false,
             }
         } else if grammar
             .scans
@@ -399,7 +375,6 @@ impl GeneratedScanner {
                 open,
                 close,
                 middle,
-                in_interp: false,
             }
         } else if externals.is_empty() {
             MachineKind::Empty
@@ -414,500 +389,6 @@ impl GeneratedScanner {
     }
 }
 
-impl Scanner for GeneratedScanner {
-    fn scan(&mut self, lexer: &mut dyn Lexer, valid: &[bool]) -> bool {
-        match &mut self.kind {
-            MachineKind::LongBracket {
-                start,
-                content,
-                end,
-                comment,
-                equals,
-                in_string,
-            } => scan_long_bracket(
-                lexer, valid, *start, *content, *end, *comment, equals, in_string,
-            ),
-            MachineKind::Offside { .. } => scan_offside(&mut self.kind, lexer, valid),
-            MachineKind::SlashTemplate { .. } => scan_slash_template(&mut self.kind, lexer, valid),
-            MachineKind::Empty => false,
-        }
-    }
-
-    fn serialize(&self, buf: &mut [u8]) -> usize {
-        if buf.is_empty() {
-            return 0;
-        }
-        let cap = buf.len().min(SERIALIZE_CAP);
-        match &self.kind {
-            MachineKind::LongBracket {
-                equals, in_string, ..
-            } => {
-                if cap < 2 {
-                    0
-                } else {
-                    buf[0] = *equals;
-                    buf[1] = u8::from(*in_string);
-                    2
-                }
-            }
-            MachineKind::Offside {
-                stack,
-                in_interp,
-                has_template,
-                ..
-            } => serialize_offside(buf, cap, stack, *in_interp, *has_template),
-            MachineKind::SlashTemplate { in_interp, .. } => {
-                buf[0] = 0;
-                buf[1] = 0;
-                if cap > 2 {
-                    buf[2] = u8::from(*in_interp);
-                    3
-                } else {
-                    0
-                }
-            }
-            MachineKind::Empty => 0,
-        }
-    }
-
-    fn deserialize(&mut self, buf: &[u8]) {
-        match &mut self.kind {
-            MachineKind::LongBracket {
-                equals, in_string, ..
-            } => {
-                *equals = 0;
-                *in_string = false;
-                if buf.len() >= 2 {
-                    *equals = buf[0];
-                    *in_string = buf[1] != 0;
-                }
-            }
-            MachineKind::Offside {
-                stack,
-                in_interp,
-                has_template,
-                pending_dedents,
-                ..
-            } => {
-                *pending_dedents = 0;
-                if buf.len() < 2 {
-                    *stack = vec![0];
-                    *in_interp = false;
-                    return;
-                }
-                let mut len = buf[1] as usize;
-                if len > OFFSIDE_STACK {
-                    len = OFFSIDE_STACK;
-                }
-                *in_interp = *has_template && buf.get(2).copied().unwrap_or(0) != 0;
-                let start = if *has_template { 3 } else { 2 };
-                if buf.len() < start + len {
-                    *stack = vec![0];
-                    *in_interp = false;
-                    return;
-                }
-                *stack = buf[start..start + len].to_vec();
-                if stack.is_empty() {
-                    *stack = vec![0];
-                }
-            }
-            MachineKind::SlashTemplate { in_interp, .. } => {
-                *in_interp = buf.get(2).copied().unwrap_or(0) != 0;
-            }
-            MachineKind::Empty => {}
-        }
-    }
-}
-
-impl GeneratedScanner {
-    pub fn serialize_into(&self, buf: &mut [u8]) -> usize {
-        Scanner::serialize(self, buf)
-    }
-
-    pub fn deserialize_from(&mut self, buf: &[u8]) {
-        Scanner::deserialize(self, buf)
-    }
-}
-
-fn advance(lexer: &mut dyn Lexer) {
-    lexer.advance(false);
-}
-
-fn opener(lexer: &mut dyn Lexer) -> Option<u8> {
-    if lexer.lookahead() != i32::from(b'[') {
-        return None;
-    }
-    advance(lexer);
-    let mut equals = 0_u8;
-    while lexer.lookahead() == i32::from(b'=') {
-        if equals == 255 {
-            return None;
-        }
-        equals += 1;
-        advance(lexer);
-    }
-    if lexer.lookahead() != i32::from(b'[') {
-        return None;
-    }
-    advance(lexer);
-    Some(equals)
-}
-
-fn closer(lexer: &mut dyn Lexer, equals: u8) -> bool {
-    if lexer.lookahead() != i32::from(b']') {
-        return false;
-    }
-    advance(lexer);
-    let mut seen = 0_u8;
-    while seen < equals && lexer.lookahead() == i32::from(b'=') {
-        seen += 1;
-        advance(lexer);
-    }
-    if seen != equals || lexer.lookahead() != i32::from(b']') {
-        return false;
-    }
-    advance(lexer);
-    true
-}
-
-fn valid_at(valid: &[bool], index: usize) -> bool {
-    valid.get(index).copied().unwrap_or(false)
-}
-
-fn scan_long_bracket(
-    lexer: &mut dyn Lexer,
-    valid: &[bool],
-    start: usize,
-    content: usize,
-    end: usize,
-    comment: Option<usize>,
-    equals: &mut u8,
-    in_string: &mut bool,
-) -> bool {
-    if let Some(comment) = comment {
-        if valid_at(valid, comment) && lexer.lookahead() == i32::from(b'-') {
-            advance(lexer);
-            if lexer.lookahead() != i32::from(b'-') {
-                return false;
-            }
-            advance(lexer);
-            let Some(eq) = opener(lexer) else {
-                return false;
-            };
-            while !lexer.eof() && lexer.lookahead() != 0 {
-                if closer(lexer, eq) {
-                    break;
-                }
-                advance(lexer);
-            }
-            return true;
-        }
-    }
-    if valid_at(valid, start) && !*in_string {
-        let Some(eq) = opener(lexer) else {
-            return false;
-        };
-        *equals = eq;
-        *in_string = true;
-        return true;
-    }
-    if *in_string && valid_at(valid, end) && closer(lexer, *equals) {
-        *in_string = false;
-        return true;
-    }
-    if *in_string && valid_at(valid, content) {
-        let mut consumed = false;
-        while !lexer.eof() && lexer.lookahead() != 0 {
-            lexer.mark_end();
-            if closer(lexer, *equals) {
-                break;
-            }
-            advance(lexer);
-            consumed = true;
-        }
-        return consumed;
-    }
-    false
-}
-
-fn serialize_offside(
-    buf: &mut [u8],
-    cap: usize,
-    stack: &[u8],
-    in_interp: bool,
-    has_template: bool,
-) -> usize {
-    if cap < 2 {
-        return 0;
-    }
-    buf[0] = 0;
-    let stack_len = stack.len().min(OFFSIDE_STACK);
-    buf[1] = u8::try_from(stack_len).unwrap_or(0);
-    let mut used = 2;
-    if has_template {
-        if cap < 3 {
-            return 0;
-        }
-        buf[2] = u8::from(in_interp);
-        used = 3;
-    }
-    let copy = stack_len.min(cap.saturating_sub(used));
-    buf[used..used + copy].copy_from_slice(&stack[..copy]);
-    (used + copy).min(SERIALIZE_CAP)
-}
-
-fn is_newline(value: i32) -> bool {
-    value == i32::from(b'\n')
-}
-
-fn scan_offside(kind: &mut MachineKind, lexer: &mut dyn Lexer, valid: &[bool]) -> bool {
-    let MachineKind::Offside {
-        tab_width,
-        mixed_tabs,
-        spaces_only,
-        has_template,
-        newline,
-        indent,
-        dedent,
-        interp_open,
-        interp_close,
-        stack,
-        pending_dedents,
-        in_interp,
-    } = kind
-    else {
-        return false;
-    };
-    if *has_template
-        && scan_template_pair(lexer, valid, in_interp, *interp_open, *interp_close, None)
-    {
-        return true;
-    }
-    if *pending_dedents > 0 && valid_at(valid, *dedent) {
-        *pending_dedents -= 1;
-        if stack.len() > 1 {
-            stack.pop();
-        }
-        if stack.is_empty() {
-            stack.push(0);
-        }
-        return true;
-    }
-    if lexer.eof() || lexer.lookahead() == 0 {
-        if stack.last().copied().unwrap_or(0) > 0 && valid_at(valid, *dedent) {
-            stack.pop();
-            if stack.is_empty() {
-                stack.push(0);
-            }
-            return true;
-        }
-        return false;
-    }
-    if !is_newline(lexer.lookahead()) && lexer.lookahead() != i32::from(b'\r') {
-        return false;
-    }
-    if lexer.lookahead() == i32::from(b'\r') {
-        advance(lexer);
-        if is_newline(lexer.lookahead()) {
-            advance(lexer);
-        }
-    } else {
-        advance(lexer);
-    }
-    let mut n = 0_u32;
-    loop {
-        match lexer.lookahead() {
-            value if value == i32::from(b' ') => {
-                n += 1;
-                advance(lexer);
-            }
-            value if value == i32::from(b'\t') => {
-                if *spaces_only {
-                    return false;
-                }
-                if !*mixed_tabs {
-                    return false;
-                }
-                n += u32::from(*tab_width);
-                advance(lexer);
-            }
-            _ => break,
-        }
-    }
-    if lexer.lookahead() == 0
-        || is_newline(lexer.lookahead())
-        || lexer.lookahead() == i32::from(b'#')
-    {
-        lexer.mark_end();
-        return valid_at(valid, *newline);
-    }
-    lexer.mark_end();
-    let n = u8::try_from(n).unwrap_or(u8::MAX);
-    let top = stack.last().copied().unwrap_or(0);
-    if n > top {
-        if !valid_at(valid, *indent) || stack.len() >= OFFSIDE_STACK {
-            return false;
-        }
-        stack.push(n);
-        return true;
-    }
-    if n == top {
-        return valid_at(valid, *newline);
-    }
-    if !valid_at(valid, *dedent) {
-        return false;
-    }
-    if !stack.contains(&n) {
-        return false;
-    }
-    stack.pop();
-    while stack.last().copied().unwrap_or(0) > n {
-        *pending_dedents += 1;
-        stack.pop();
-    }
-    if stack.last().copied() != Some(n) {
-        return false;
-    }
-    true
-}
-
-fn scan_template_pair(
-    lexer: &mut dyn Lexer,
-    valid: &[bool],
-    in_interp: &mut bool,
-    open: Option<usize>,
-    close: Option<usize>,
-    middle: Option<usize>,
-) -> bool {
-    if !*in_interp {
-        if let Some(open) = open {
-            if valid_at(valid, open) && lexer.lookahead() == i32::from(b'`') {
-                advance(lexer);
-                loop {
-                    if lexer.eof() || lexer.lookahead() == 0 {
-                        lexer.mark_end();
-                        *in_interp = true;
-                        return true;
-                    }
-                    if lexer.lookahead() == i32::from(b'`') {
-                        advance(lexer);
-                        lexer.mark_end();
-                        return true;
-                    }
-                    if lexer.lookahead() == i32::from(b'$') {
-                        advance(lexer);
-                        if lexer.lookahead() == i32::from(b'{') {
-                            advance(lexer);
-                            lexer.mark_end();
-                            *in_interp = true;
-                            return true;
-                        }
-                        continue;
-                    }
-                    if lexer.lookahead() == i32::from(b'\\') {
-                        advance(lexer);
-                    }
-                    advance(lexer);
-                }
-            }
-        }
-        return false;
-    }
-    if lexer.lookahead() != i32::from(b'}') {
-        return false;
-    }
-    advance(lexer);
-    loop {
-        if lexer.eof() || lexer.lookahead() == 0 {
-            lexer.mark_end();
-            *in_interp = false;
-            return close.is_some_and(|index| valid_at(valid, index));
-        }
-        if lexer.lookahead() == i32::from(b'`') {
-            advance(lexer);
-            lexer.mark_end();
-            *in_interp = false;
-            return close.is_some_and(|index| valid_at(valid, index));
-        }
-        if lexer.lookahead() == i32::from(b'$') {
-            advance(lexer);
-            if lexer.lookahead() == i32::from(b'{') {
-                advance(lexer);
-                lexer.mark_end();
-                return middle.is_some_and(|index| valid_at(valid, index));
-            }
-            continue;
-        }
-        if lexer.lookahead() == i32::from(b'\\') {
-            advance(lexer);
-        }
-        advance(lexer);
-    }
-}
-
-fn scan_slash_template(kind: &mut MachineKind, lexer: &mut dyn Lexer, valid: &[bool]) -> bool {
-    let MachineKind::SlashTemplate {
-        regex,
-        division,
-        open,
-        close,
-        middle,
-        in_interp,
-    } = kind
-    else {
-        return false;
-    };
-    if scan_template_pair(lexer, valid, in_interp, *open, *close, *middle) {
-        return true;
-    }
-    if lexer.lookahead() != i32::from(b'/') {
-        return false;
-    }
-    advance(lexer);
-    // Recovery may mark division/regex valid; extras must still see comments.
-    if lexer.lookahead() == i32::from(b'/') || lexer.lookahead() == i32::from(b'*') {
-        return false;
-    }
-    if let Some(division) = *division {
-        if valid_at(valid, division) {
-            lexer.mark_end();
-            return true;
-        }
-    }
-    if let Some(regex) = *regex {
-        if valid_at(valid, regex) && !division.is_some_and(|index| valid_at(valid, index)) {
-            let mut in_class = false;
-            loop {
-                if lexer.eof() || lexer.lookahead() == 0 || is_newline(lexer.lookahead()) {
-                    lexer.mark_end();
-                    return true;
-                }
-                let value = lexer.lookahead();
-                if value == i32::from(b'\\') {
-                    advance(lexer);
-                    advance(lexer);
-                    continue;
-                }
-                if value == i32::from(b'[') {
-                    in_class = true;
-                } else if value == i32::from(b']') {
-                    in_class = false;
-                } else if value == i32::from(b'/') && !in_class {
-                    advance(lexer);
-                    while lexer.lookahead() >= i32::from(b'a')
-                        && lexer.lookahead() <= i32::from(b'z')
-                    {
-                        advance(lexer);
-                    }
-                    lexer.mark_end();
-                    return true;
-                }
-                advance(lexer);
-            }
-        }
-    }
-    false
-}
 
 pub fn emit_c(grammar: &GrammarIr) -> Result<String, String> {
     let scanner = GeneratedScanner::from_grammar(grammar)?;
@@ -929,7 +410,6 @@ fn emit_c_for(scanner: &GeneratedScanner) -> String {
             content,
             end,
             comment,
-            ..
         } => out.push_str(&long_bracket_c(
             lang,
             &scanner.externals,
@@ -948,7 +428,6 @@ fn emit_c_for(scanner: &GeneratedScanner) -> String {
             dedent,
             interp_open,
             interp_close,
-            ..
         } => out.push_str(&offside_c(
             lang,
             &scanner.externals,
@@ -968,7 +447,6 @@ fn emit_c_for(scanner: &GeneratedScanner) -> String {
             open,
             close,
             middle,
-            ..
         } => out.push_str(&slash_template_c(
             lang,
             &scanner.externals,
@@ -1012,9 +490,17 @@ fn long_bracket_c(
     adv(lexer);
     uint8_t eq = 0;
     if (!opener(lexer, &eq)) return false;
-    while (!done(lexer)) {{
-      if (closer(lexer, eq)) {{ lexer->result_symbol = {comment_tok}; return true; }}
-      if (!bump(lexer)) break;
+    unsigned n = 0;
+    while (!done(lexer) && n < 8388608u) {{
+      n++;
+      if (lexer->lookahead == ']') {{
+        if (closer(lexer, eq)) {{ lexer->result_symbol = {comment_tok}; return true; }}
+        continue;
+      }}
+      int32_t ch = lexer->lookahead;
+      uint32_t col = lexer->get_column(lexer);
+      adv(lexer);
+      if (!done(lexer) && lexer->lookahead == ch && lexer->get_column(lexer) == col) break;
     }}
     lexer->result_symbol = {comment_tok};
     return true;
@@ -1028,11 +514,6 @@ fn long_bracket_c(
 typedef struct {{ uint8_t equals; bool in_string; }} Scanner;
 static void adv(TSLexer *lexer) {{ lexer->advance(lexer, false); }}
 static bool done(TSLexer *lexer) {{ return lexer->lookahead == 0 || lexer->eof(lexer); }}
-static bool bump(TSLexer *lexer) {{
-  int32_t before = lexer->lookahead;
-  lexer->advance(lexer, false);
-  return lexer->lookahead != before || lexer->eof(lexer) || lexer->lookahead == 0;
-}}
 static bool opener(TSLexer *lexer, uint8_t *equals) {{
   if (lexer->lookahead != '[') return false;
   adv(lexer);
@@ -1091,11 +572,21 @@ bool tree_sitter_{lang}_external_scanner_scan(void *p, TSLexer *lexer, const boo
   }}
   if (s->in_string && valid[{content_tok}]) {{
     bool consumed = false;
-    while (!done(lexer)) {{
-      lexer->mark_end(lexer);
-      if (closer(lexer, s->equals)) break;
-      if (!bump(lexer)) break;
+    unsigned n = 0;
+    while (!done(lexer) && n < 8388608u) {{
+      n++;
+      if (lexer->lookahead == ']') {{
+        lexer->mark_end(lexer);
+        if (closer(lexer, s->equals)) break;
+        consumed = true;
+        continue;
+      }}
+      int32_t ch = lexer->lookahead;
+      uint32_t col = lexer->get_column(lexer);
+      adv(lexer);
       consumed = true;
+      lexer->mark_end(lexer);
+      if (!done(lexer) && lexer->lookahead == ch && lexer->get_column(lexer) == col) break;
     }}
     if (consumed) {{ lexer->result_symbol = {content_tok}; return true; }}
   }}
@@ -1160,11 +651,6 @@ fn offside_c(
 typedef struct {{ uint8_t stack[32]; uint8_t len; uint8_t pending; bool in_interp; }} Scanner;
 static void adv(TSLexer *lexer) {{ lexer->advance(lexer, false); }}
 static bool done(TSLexer *lexer) {{ return lexer->lookahead == 0 || lexer->eof(lexer); }}
-static bool bump(TSLexer *lexer) {{
-  int32_t before = lexer->lookahead;
-  lexer->advance(lexer, false);
-  return lexer->lookahead != before || lexer->eof(lexer) || lexer->lookahead == 0;
-}}
 void *tree_sitter_{lang}_external_scanner_create(void) {{
   Scanner *s = (Scanner *)calloc(1, sizeof(Scanner));
   if (!s) return NULL;
@@ -1281,11 +767,6 @@ fn slash_template_c(
 typedef struct {{ bool in_interp; }} Scanner;
 static void adv(TSLexer *lexer) {{ lexer->advance(lexer, false); }}
 static bool done(TSLexer *lexer) {{ return lexer->lookahead == 0 || lexer->eof(lexer); }}
-static bool bump(TSLexer *lexer) {{
-  int32_t before = lexer->lookahead;
-  lexer->advance(lexer, false);
-  return lexer->lookahead != before || lexer->eof(lexer) || lexer->lookahead == 0;
-}}
 void *tree_sitter_{lang}_external_scanner_create(void) {{ return calloc(1, sizeof(Scanner)); }}
 void tree_sitter_{lang}_external_scanner_destroy(void *p) {{ free(p); }}
 unsigned tree_sitter_{lang}_external_scanner_serialize(void *p, char *buf) {{
@@ -1376,51 +857,4 @@ bool tree_sitter_{lang}_external_scanner_scan(void *p, TSLexer *lexer, const boo
         regex = regex,
         division = division,
     )
-}
-
-pub struct MockLexer {
-    pub source: Vec<u8>,
-    pub at: usize,
-    pub marked: usize,
-    pub column: u32,
-}
-
-impl MockLexer {
-    pub fn new(source: &str) -> Self {
-        Self {
-            source: source.as_bytes().to_vec(),
-            at: 0,
-            marked: 0,
-            column: 0,
-        }
-    }
-}
-
-impl Lexer for MockLexer {
-    fn lookahead(&self) -> i32 {
-        self.source
-            .get(self.at)
-            .copied()
-            .map(i32::from)
-            .unwrap_or(0)
-    }
-    fn advance(&mut self, _skip: bool) {
-        if self.at < self.source.len() {
-            if self.source[self.at] == b'\n' {
-                self.column = 0;
-            } else {
-                self.column += 1;
-            }
-            self.at += 1;
-        }
-    }
-    fn mark_end(&mut self) {
-        self.marked = self.at;
-    }
-    fn column(&self) -> u32 {
-        self.column
-    }
-    fn eof(&self) -> bool {
-        self.at >= self.source.len()
-    }
 }
