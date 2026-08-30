@@ -10,7 +10,7 @@ The tagline is **Author a grammar. Query any language the same way.** Authors
 write `.grammar` files. The compiler emits parsers and scanners. Callers ask
 language-neutral questions of the tree.
 
-Do not add a dependency on the snapshot repo under `references/`. Do not import
+Do not add a dependency on agent-os. Do not import
 community `tree-sitter-*` crates. Do not enable Tree-sitter’s JavaScript grammar
 path. Do not write first-party scanners as C files.
 
