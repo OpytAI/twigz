@@ -48,7 +48,7 @@ Set the output root in ignored `user.bazelrc`. Use an absolute path. Do not
 leave Bazel output under `/tmp` or `~/.cache/bazel`.
 
 ```bazelrc
-startup --output_user_root=/mnt/workspace/opytai/twigz/bazel-cache
+startup --output_user_root=/path/to/local/bazel-cache
 ```
 
 The tracked `.bazelrc` imports `user.bazelrc` automatically. Do not add the
