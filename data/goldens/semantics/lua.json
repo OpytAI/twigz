@@ -51,6 +51,28 @@
       "traits": []
     },
     {
+      "concrete": "bitwise_expression",
+      "semantic": "operator",
+      "semantic_id": 18,
+      "roles": {
+        "left": {
+          "id": 7,
+          "concrete": "left",
+          "types": [
+            "_expression"
+          ]
+        },
+        "right": {
+          "id": 8,
+          "concrete": "right",
+          "types": [
+            "_expression"
+          ]
+        }
+      },
+      "traits": []
+    },
+    {
       "concrete": "block",
       "semantic": "block",
       "semantic_id": 10,
@@ -59,7 +81,8 @@
           "id": 2,
           "concrete": "body",
           "types": [
-            "_statement"
+            "_statement",
+            "return_statement"
           ]
         }
       },
@@ -102,7 +125,7 @@
           "id": 1,
           "concrete": "name",
           "types": [
-            "identifier"
+            "for_binding"
           ]
         }
       },
@@ -337,7 +360,8 @@
           "id": 2,
           "concrete": "body",
           "types": [
-            "_statement"
+            "_statement",
+            "return_statement"
           ]
         }
       },
@@ -450,7 +474,8 @@
           "id": 2,
           "concrete": "body",
           "types": [
-            "_statement"
+            "_statement",
+            "return_statement"
           ]
         }
       },
@@ -466,6 +491,21 @@
       "semantic": "table",
       "semantic_id": 16,
       "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "tilde_expression",
+      "semantic": "operator",
+      "semantic_id": 18,
+      "roles": {
+        "right": {
+          "id": 8,
+          "concrete": "argument",
+          "types": [
+            "_expression"
+          ]
+        }
+      },
       "traits": []
     },
     {

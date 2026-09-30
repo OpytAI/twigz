@@ -126,6 +126,30 @@ pub enum ScanRule {
         #[serde(skip_serializing_if = "Option::is_none")]
         chunk: Option<String>,
     },
+    Lexical {
+        language: String,
+    },
+}
+
+pub fn lexical_externals(language: &str) -> Option<&'static [&'static str]> {
+    match language {
+        "lua" => Some(&["quoted_string", "shebang"]),
+        "luau" => Some(&[
+            "quoted_string",
+            "number",
+            "interp_simple",
+            "interp_begin",
+            "interp_mid",
+            "interp_end",
+            "continue_keyword",
+            "type_keyword",
+            "export_keyword",
+            "const_keyword",
+            "read_keyword",
+            "write_keyword",
+        ]),
+        _ => None,
+    }
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]

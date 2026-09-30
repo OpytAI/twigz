@@ -44,6 +44,12 @@
         },
         {
           "Symbol": "binary_expression"
+        },
+        {
+          "Symbol": "bitwise_expression"
+        },
+        {
+          "Symbol": "tilde_expression"
         }
       ]
     },
@@ -103,9 +109,6 @@
         },
         {
           "Symbol": "for_generic_statement"
-        },
-        {
-          "Symbol": "return_statement"
         },
         {
           "Symbol": "break_statement"
@@ -351,157 +354,6 @@
         },
         {
           "Precedence": {
-            "associativity": "Left",
-            "value": {
-              "Integer": 4
-            },
-            "content": {
-              "Sequence": [
-                {
-                  "Field": {
-                    "name": "left",
-                    "content": {
-                      "Symbol": "_expression"
-                    }
-                  }
-                },
-                {
-                  "Field": {
-                    "name": "operator",
-                    "content": {
-                      "Literal": "|"
-                    }
-                  }
-                },
-                {
-                  "Field": {
-                    "name": "right",
-                    "content": {
-                      "Symbol": "_expression"
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        },
-        {
-          "Precedence": {
-            "associativity": "Left",
-            "value": {
-              "Integer": 5
-            },
-            "content": {
-              "Sequence": [
-                {
-                  "Field": {
-                    "name": "left",
-                    "content": {
-                      "Symbol": "_expression"
-                    }
-                  }
-                },
-                {
-                  "Field": {
-                    "name": "operator",
-                    "content": {
-                      "Literal": "~"
-                    }
-                  }
-                },
-                {
-                  "Field": {
-                    "name": "right",
-                    "content": {
-                      "Symbol": "_expression"
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        },
-        {
-          "Precedence": {
-            "associativity": "Left",
-            "value": {
-              "Integer": 6
-            },
-            "content": {
-              "Sequence": [
-                {
-                  "Field": {
-                    "name": "left",
-                    "content": {
-                      "Symbol": "_expression"
-                    }
-                  }
-                },
-                {
-                  "Field": {
-                    "name": "operator",
-                    "content": {
-                      "Literal": "&"
-                    }
-                  }
-                },
-                {
-                  "Field": {
-                    "name": "right",
-                    "content": {
-                      "Symbol": "_expression"
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        },
-        {
-          "Precedence": {
-            "associativity": "Left",
-            "value": {
-              "Integer": 7
-            },
-            "content": {
-              "Sequence": [
-                {
-                  "Field": {
-                    "name": "left",
-                    "content": {
-                      "Symbol": "_expression"
-                    }
-                  }
-                },
-                {
-                  "Field": {
-                    "name": "operator",
-                    "content": {
-                      "Choice": [
-                        {
-                          "Literal": "<<"
-                        },
-                        {
-                          "Literal": ">>"
-                        }
-                      ]
-                    }
-                  }
-                },
-                {
-                  "Field": {
-                    "name": "right",
-                    "content": {
-                      "Symbol": "_expression"
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        },
-        {
-          "Precedence": {
             "associativity": "Right",
             "value": {
               "Integer": 8
@@ -666,15 +518,199 @@
         }
       ]
     },
-    "block": {
-      "Field": {
-        "name": "body",
-        "content": {
-          "Repeat1": {
-            "Symbol": "_statement"
+    "bitwise_expression": {
+      "Choice": [
+        {
+          "Precedence": {
+            "associativity": "Left",
+            "value": {
+              "Integer": 4
+            },
+            "content": {
+              "Sequence": [
+                {
+                  "Field": {
+                    "name": "left",
+                    "content": {
+                      "Symbol": "_expression"
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "operator",
+                    "content": {
+                      "Literal": "|"
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "right",
+                    "content": {
+                      "Symbol": "_expression"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "Precedence": {
+            "associativity": "Left",
+            "value": {
+              "Integer": 5
+            },
+            "content": {
+              "Sequence": [
+                {
+                  "Field": {
+                    "name": "left",
+                    "content": {
+                      "Symbol": "_expression"
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "operator",
+                    "content": {
+                      "Literal": "~"
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "right",
+                    "content": {
+                      "Symbol": "_expression"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "Precedence": {
+            "associativity": "Left",
+            "value": {
+              "Integer": 6
+            },
+            "content": {
+              "Sequence": [
+                {
+                  "Field": {
+                    "name": "left",
+                    "content": {
+                      "Symbol": "_expression"
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "operator",
+                    "content": {
+                      "Literal": "&"
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "right",
+                    "content": {
+                      "Symbol": "_expression"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "Precedence": {
+            "associativity": "Left",
+            "value": {
+              "Integer": 7
+            },
+            "content": {
+              "Sequence": [
+                {
+                  "Field": {
+                    "name": "left",
+                    "content": {
+                      "Symbol": "_expression"
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "operator",
+                    "content": {
+                      "Choice": [
+                        {
+                          "Literal": "<<"
+                        },
+                        {
+                          "Literal": ">>"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Field": {
+                    "name": "right",
+                    "content": {
+                      "Symbol": "_expression"
+                    }
+                  }
+                }
+              ]
+            }
           }
         }
-      }
+      ]
+    },
+    "block": {
+      "Choice": [
+        {
+          "Field": {
+            "name": "body",
+            "content": {
+              "Repeat1": {
+                "Symbol": "_statement"
+              }
+            }
+          }
+        },
+        {
+          "Sequence": [
+            {
+              "Field": {
+                "name": "body",
+                "content": {
+                  "Repeat": {
+                    "Symbol": "_statement"
+                  }
+                }
+              }
+            },
+            {
+              "Field": {
+                "name": "body",
+                "content": {
+                  "Symbol": "return_statement"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "block_tail": {
+      "Symbol": "return_statement"
     },
     "boolean": {
       "Choice": [
@@ -830,6 +866,14 @@
         }
       ]
     },
+    "for_binding": {
+      "Field": {
+        "name": "name",
+        "content": {
+          "Symbol": "identifier"
+        }
+      }
+    },
     "for_generic_statement": {
       "Sequence": [
         {
@@ -841,7 +885,7 @@
             "content": {
               "Sequence": [
                 {
-                  "Symbol": "identifier"
+                  "Symbol": "for_binding"
                 },
                 {
                   "Repeat": {
@@ -850,7 +894,7 @@
                         "Literal": ","
                       },
                       {
-                        "Symbol": "identifier"
+                        "Symbol": "for_binding"
                       }
                     ]
                   }
@@ -1272,6 +1316,19 @@
         ]
       }
     },
+    "local_attribute": {
+      "Sequence": [
+        {
+          "Literal": "<"
+        },
+        {
+          "Symbol": "identifier"
+        },
+        {
+          "Literal": ">"
+        }
+      ]
+    },
     "local_declaration": {
       "Sequence": [
         {
@@ -1364,12 +1421,34 @@
       ]
     },
     "local_name": {
-      "Field": {
-        "name": "name",
-        "content": {
-          "Symbol": "identifier"
+      "Sequence": [
+        {
+          "Field": {
+            "name": "name",
+            "content": {
+              "Symbol": "identifier"
+            }
+          }
+        },
+        {
+          "Choice": [
+            {
+              "Sequence": [
+                {
+                  "Literal": "<"
+                },
+                {
+                  "Symbol": "identifier"
+                },
+                {
+                  "Literal": ">"
+                }
+              ]
+            },
+            "Empty"
+          ]
         }
-      }
+      ]
     },
     "long_string": {
       "Sequence": [
@@ -1387,14 +1466,31 @@
       ]
     },
     "lua_family_unit": {
-      "Field": {
-        "name": "body",
-        "content": {
-          "Repeat": {
-            "Symbol": "_statement"
+      "Sequence": [
+        {
+          "Field": {
+            "name": "body",
+            "content": {
+              "Repeat": {
+                "Symbol": "_statement"
+              }
+            }
+          }
+        },
+        {
+          "Field": {
+            "name": "body",
+            "content": {
+              "Choice": [
+                {
+                  "Symbol": "return_statement"
+                },
+                "Empty"
+              ]
+            }
           }
         }
-      }
+      ]
     },
     "member_expression": {
       "Precedence": {
@@ -1433,7 +1529,7 @@
     "number": {
       "Token": {
         "Pattern": {
-          "value": "(0[xX][0-9A-Fa-f]+(\\.[0-9A-Fa-f]*)?([pP][+-]?[0-9]+)?|[0-9]+(\\.[0-9]*)?([eE][+-]?[0-9]+)?|\\.[0-9]+([eE][+-]?[0-9]+)?)",
+          "value": "(0[xX]([0-9A-Fa-f]+(\\.[0-9A-Fa-f]*)?|\\.[0-9A-Fa-f]+)([pP][+-]?[0-9]+)?|[0-9]+(\\.[0-9]*)?([eE][+-]?[0-9]+)?|\\.[0-9]+([eE][+-]?[0-9]+)?)",
           "flags": ""
         }
       }
@@ -1512,14 +1608,6 @@
           "Literal": ")"
         }
       ]
-    },
-    "quoted_string": {
-      "Token": {
-        "Pattern": {
-          "value": "\"([^\"\\\\\\n\\r]|\\\\.)*\"|'([^'\\\\\\n\\r]|\\\\.)*'",
-          "flags": ""
-        }
-      }
     },
     "repeat_statement": {
       "Sequence": [
@@ -1605,14 +1693,39 @@
       }
     },
     "source_file": {
-      "Field": {
-        "name": "body",
-        "content": {
-          "Repeat": {
-            "Symbol": "_statement"
+      "Sequence": [
+        {
+          "Choice": [
+            {
+              "Symbol": "shebang"
+            },
+            "Empty"
+          ]
+        },
+        {
+          "Field": {
+            "name": "body",
+            "content": {
+              "Repeat": {
+                "Symbol": "_statement"
+              }
+            }
+          }
+        },
+        {
+          "Field": {
+            "name": "body",
+            "content": {
+              "Choice": [
+                {
+                  "Symbol": "return_statement"
+                },
+                "Empty"
+              ]
+            }
           }
         }
-      }
+      ]
     },
     "table_constructor": {
       "Sequence": [
@@ -1630,23 +1743,37 @@
                   "Repeat": {
                     "Sequence": [
                       {
-                        "Literal": ","
+                        "Choice": [
+                          {
+                            "Literal": ","
+                          },
+                          {
+                            "Literal": ";"
+                          }
+                        ]
                       },
                       {
                         "Symbol": "field_entry"
                       }
                     ]
                   }
+                },
+                {
+                  "Choice": [
+                    {
+                      "Choice": [
+                        {
+                          "Literal": ","
+                        },
+                        {
+                          "Literal": ";"
+                        }
+                      ]
+                    },
+                    "Empty"
+                  ]
                 }
               ]
-            },
-            "Empty"
-          ]
-        },
-        {
-          "Choice": [
-            {
-              "Literal": ","
             },
             "Empty"
           ]
@@ -1655,6 +1782,34 @@
           "Literal": "}"
         }
       ]
+    },
+    "tilde_expression": {
+      "Precedence": {
+        "associativity": "Right",
+        "value": {
+          "Integer": 12
+        },
+        "content": {
+          "Sequence": [
+            {
+              "Field": {
+                "name": "operator",
+                "content": {
+                  "Literal": "~"
+                }
+              }
+            },
+            {
+              "Field": {
+                "name": "argument",
+                "content": {
+                  "Symbol": "_expression"
+                }
+              }
+            }
+          ]
+        }
+      }
     },
     "unary_expression": {
       "Precedence": {
@@ -1677,9 +1832,6 @@
                     },
                     {
                       "Literal": "-"
-                    },
-                    {
-                      "Literal": "~"
                     }
                   ]
                 }
@@ -1750,7 +1902,7 @@
     "whitespace": {
       "Token": {
         "Pattern": {
-          "value": "[\\t\\n\\r ]+",
+          "value": "[\\t\\n\\r\\x0b\\x0c ]+",
           "flags": ""
         }
       }
@@ -1779,6 +1931,12 @@
     },
     {
       "Symbol": "long_comment"
+    },
+    {
+      "Symbol": "quoted_string"
+    },
+    {
+      "Symbol": "shebang"
     }
   ],
   "inline": [],
@@ -1819,6 +1977,15 @@
     },
     {
       "concrete": "binary_expression",
+      "semantic": "operator",
+      "roles": {
+        "left": "left",
+        "right": "right"
+      },
+      "traits": []
+    },
+    {
+      "concrete": "bitwise_expression",
       "semantic": "operator",
       "roles": {
         "left": "left",
@@ -1984,12 +2151,6 @@
       ]
     },
     {
-      "concrete": "quoted_string",
-      "semantic": "string",
-      "roles": {},
-      "traits": []
-    },
-    {
       "concrete": "repeat_statement",
       "semantic": "loop",
       "roles": {
@@ -2023,6 +2184,14 @@
       "traits": []
     },
     {
+      "concrete": "tilde_expression",
+      "semantic": "operator",
+      "roles": {
+        "right": "argument"
+      },
+      "traits": []
+    },
+    {
       "concrete": "unary_expression",
       "semantic": "operator",
       "roles": {
@@ -2042,6 +2211,12 @@
     {
       "concrete": "long_comment",
       "semantic": "comment",
+      "roles": {},
+      "traits": []
+    },
+    {
+      "concrete": "quoted_string",
+      "semantic": "string",
       "roles": {},
       "traits": []
     }
@@ -2182,6 +2357,10 @@
         ]
       },
       "keep": []
+    },
+    {
+      "machine": "Lexical",
+      "language": "lua"
     }
   ]
 }

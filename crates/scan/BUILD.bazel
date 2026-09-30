@@ -4,7 +4,10 @@ package(default_visibility = ["//visibility:public"])
 
 rust_library(
     name = "scan",
-    srcs = ["src/lib.rs"],
+    srcs = [
+        "src/lexical.rs",
+        "src/lib.rs",
+    ],
     crate_name = "twigz_scan",
     edition = "2021",
     deps = [

@@ -3,31 +3,84 @@ grammar luau "0.725.0"
 use lua.core
 start source_file
 
-source_file = body:_statement*
+scan lexical luau
+external quoted_string | number | interp_simple | interp_begin | interp_mid | interp_end | continue_keyword | type_keyword | export_keyword | const_keyword | read_keyword | write_keyword
+
+map quoted_string => string
+map number => literal
+
+source_file = body:_statement* body:block_tail?
   => module(body)
      derives scope
 
 extend _statement =
   | type_alias_declaration
-  | exported_type_alias_declaration
+  | type_function_declaration
   | compound_assignment_statement
-  | continue_statement
+  | const_statement
+  | const_function_declaration
+  | export_statement
+  | attribute_statement
 
-extend _expression = if_expression | type_cast_expression | interpolated_string
+extend _expression =
+  | if_expression
+  | type_cast_expression
+  | interpolated_string
+  | attributed_function
 
+fill block_tail = return_statement | break_tail | continue_statement
+fill generic_list = function_generics
 fill type_annotation = ":" type:type_expression
-fill return_type_annotation = ":" return_type:type_expression
+fill return_type_annotation = ":" return_type:function_return
 
-type_alias_declaration = "type" name:identifier type_parameters? "=" value:type_expression
+break_tail = break_statement ";"?
+continue_statement = continue_keyword ";"?
+attribute = "@" identifier | "@[" attribute_item ("," attribute_item)* "]"
+attribute_item = identifier arguments?
+
+attribute_statement =
+  attribute+
+  (function_declaration | local_function_declaration | export_keyword function_declaration | const_function_declaration)
+
+attributed_function = attribute+ function_expression
+const_statement = const_keyword separated1(local_name, ",") "=" separated1(_expression, ",")
+
+const_function_declaration =
+  const_keyword "function" name:identifier generic_list? parameters:parameters
+  return_type_annotation? body:block? "end"
+  => function(name, parameters, body)
+     derives declaration, scope
+
+export_statement =
+  export_keyword
+  (type_function_declaration | type_alias_declaration | function_declaration | "local" separated1(local_name, ",") ("=" separated1(_expression, ","))? | const_keyword separated1(local_name, ",") "=" separated1(_expression, ","))
+
+type_alias_declaration = type_keyword name:identifier type_parameters? "=" value:type_expression
   => declaration(name)
      derives declaration
 
-exported_type_alias_declaration = "export" type_alias_declaration
-type_parameters = "<" separated1(type_parameter, ",") ">"
+type_function_declaration =
+  type_keyword "function" name:identifier generic_list? parameters:parameters
+  return_type_annotation? body:block? "end"
+  => declaration(name)
+     derives declaration
+
+function_generics =
+  | "<" separated1(identifier, ",") ("," generic_pack)+ ">"
+  | "<" separated1(generic_pack, ",") ">"
+  | "<" separated1(identifier, ",") ">"
+
+generic_pack = identifier "..."
+
+type_parameters =
+  | "<" separated1(type_parameter, ",") ("," generic_pack)+ ">"
+  | "<" separated1(generic_pack, ",") ">"
+  | "<" separated1(type_parameter, ",") ">"
+
 type_parameter = name:identifier ("=" value:type_expression)?
 
 type_expression =
-  | identifier
+  | named_type
   | "nil"
   | "boolean"
   | "number"
@@ -40,44 +93,72 @@ type_expression =
   | singleton_type
   | table_type
   | function_type
+  | grouped_type
   | union_type
   | intersection_type
   | optional_type
   | generic_type
   | typeof_type
+  | leading_union
+  | leading_intersection
   => type
 
+named_type = identifier ("." identifier)?
 singleton_type = quoted_string | "true" | "false"
-table_type = "{" (separated1(type_field, ",") ","?)? "}"
+table_type = "{" (separated1(type_field, "," | ";") ("," | ";")?)? "}"
+access = read_keyword | write_keyword
 
 type_field =
-  | name:identifier ":" value:type_expression
-  | "[" name:type_expression "]" ":" value:type_expression
+  | access? name:identifier ":" value:type_expression
+  | access? "[" index:type_expression "]" ":" value:type_expression
   | value:type_expression
 
-function_type = right 1: type_parameters? "(" separated(type_expression, ",") ")" "->" return_type:type_expression
+grouped_type = "(" type_expression ")"
+
+function_type_parameter =
+  | name:identifier ":" type_expression
+  | "..." type_expression
+  | identifier "..."
+  | type_expression
+
+function_return =
+  | "(" ")"
+  | "(" type_expression ("," type_expression)+ ")"
+  | identifier "..."
+  | type_expression
+
+function_type = right 1: function_generics? "(" separated(function_type_parameter, ",") ")" "->" return_type:function_return
   => type
 
 union_type = left 1: left:type_expression "|" right:type_expression
 intersection_type = left 2: left:type_expression "&" right:type_expression
 optional_type = left 3: type_expression "?"
-generic_type = left 4: identifier "<" separated1(type_expression, ",") ">"
+generic_type = left 4: named_type "<" separated1(type_expression, ",") ">"
 typeof_type = "typeof" "(" _expression ")"
+
+prefix leading_union over type_expression
+  right 0: "|"
+
+prefix leading_intersection over type_expression
+  right 0: "&"
 
 compound_assignment_statement =
   left:variable operator:("+=" | "-=" | "*=" | "/=" | "//=" | "%=" | "^=" | "..=") right:_expression
   => assignment(left, right)
 
-continue_statement = "continue"
-
-if_expression = right 1: "if" condition:_expression "then" consequence:_expression "else" alternative:_expression
+if_expression = right 1: "if" condition:_expression "then" consequence:_expression elseif_expression* "else" alternative:_expression
   => branch(condition, body=consequence)
+
+elseif_expression = "elseif" condition:_expression "then" consequence:_expression
 
 type_cast_expression = left 11: value:_expression "::" type:type_expression
   => operator(left=value)
 
-token interpolated_string = "`" /([^`\\]|\\.)*/ "`"
+interpolated_string = interp_simple | interp_begin (_expression interp_mid)* _expression interp_end
   => string
 
 conflict type_expression _expression
 conflict table_type table_constructor
+conflict function_type_parameter grouped_type
+conflict function_return function_type_parameter
+conflict function_return named_type

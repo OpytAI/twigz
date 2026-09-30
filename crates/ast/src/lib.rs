@@ -241,4 +241,8 @@ pub enum Declaration {
         chunk: Option<String>,
         span: Span,
     },
+    ScanLexical {
+        language: String,
+        span: Span,
+    },
 }

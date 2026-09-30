@@ -209,7 +209,8 @@ impl State {
                 Declaration::Scan { .. }
                 | Declaration::ScanIndent { .. }
                 | Declaration::ScanSlash { .. }
-                | Declaration::ScanTemplate { .. } => {
+                | Declaration::ScanTemplate { .. }
+                | Declaration::ScanLexical { .. } => {
                     self.scans.push(declaration.clone());
                 }
                 Declaration::OperatorTable {
@@ -540,6 +541,11 @@ fn covered_externals(rule: &ScanRule) -> Vec<String> {
             }
             names
         }
+        ScanRule::Lexical { language } => twigz_ir::lexical_externals(language)
+            .unwrap_or(&[])
+            .iter()
+            .map(|name| (*name).to_string())
+            .collect(),
     }
 }
 
@@ -615,6 +621,14 @@ fn lower_scans(state: &State) -> Result<Vec<ScanRule>, String> {
                 close: close.clone(),
                 chunk: chunk.clone(),
             },
+            Declaration::ScanLexical { language, span } => {
+                if twigz_ir::lexical_externals(language).is_none() {
+                    return Err(State::error(span, "scan lexical requires lua or luau"));
+                }
+                ScanRule::Lexical {
+                    language: language.clone(),
+                }
+            }
             _ => continue,
         };
         for name in covered_externals(&rule) {
@@ -623,6 +637,15 @@ fn lower_scans(state: &State) -> Result<Vec<ScanRule>, String> {
             }
         }
         out.push(rule);
+    }
+    let has_lexical = out
+        .iter()
+        .any(|rule| matches!(rule, ScanRule::Lexical { .. }));
+    let has_pattern = out
+        .iter()
+        .any(|rule| matches!(rule, ScanRule::Pattern { .. }));
+    if has_lexical && !has_pattern {
+        return Err("scan lexical requires the long-bracket machine".into());
     }
     Ok(out)
 }

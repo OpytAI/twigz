@@ -12,20 +12,19 @@ scan long_string_content = (!long_string_end .)+
 scan long_comment = "--" "[" pad:"="* "[" (!("]" "="{pad} "]") .)* ("]" "="{pad} "]")?
 word identifier
 
-token whitespace = /[\t\n\r ]+/
+token whitespace = /[\t\n\r\x0b\x0c ]+/
 token line_comment = "--" /[^\n\r]*/
   => comment
 token identifier = /[A-Za-z_][A-Za-z0-9_]*/
   => identifier
-token number = /(0[xX][0-9A-Fa-f]+(\.[0-9A-Fa-f]*)?([pP][+-]?[0-9]+)?|[0-9]+(\.[0-9]*)?([eE][+-]?[0-9]+)?|\.[0-9]+([eE][+-]?[0-9]+)?)/
-  => literal
-token quoted_string = /"([^"\\\n\r]|\\.)*"|'([^'\\\n\r]|\\.)*'/
-  => string
 
 slot type_annotation
 slot return_type_annotation
+slot local_attribute
+slot generic_list
+slot block_tail
 
-lua_family_unit = body:_statement*
+lua_family_unit = body:_statement* body:block_tail?
   => module(body)
      derives scope
 
@@ -42,10 +41,6 @@ open _statement =
   | if_statement
   | for_numeric_statement
   | for_generic_statement
-  | return_statement
-  | break_statement
-  | goto_statement
-  | label_statement
 
 empty_statement = ";"
 
@@ -54,17 +49,19 @@ assignment_statement = left:separated1(variable, ",") "=" right:separated1(_expr
 
 local_declaration = "local" separated1(local_name, ",") ("=" separated1(_expression, ","))?
 
-local_name = name:identifier type_annotation?
+local_name = name:identifier local_attribute? type_annotation?
   => declaration(name)
      derives declaration
 
 function_declaration =
-  "function" name:function_name parameters:parameters return_type_annotation? body:block? "end"
+  "function" name:function_name generic_list? parameters:parameters return_type_annotation?
+  body:block? "end"
   => function(name, parameters, body)
      derives declaration, scope
 
 local_function_declaration =
-  "local" "function" name:identifier parameters:parameters return_type_annotation? body:block? "end"
+  "local" "function" name:identifier generic_list? parameters:parameters return_type_annotation?
+  body:block? "end"
   => function(name, parameters, body)
      derives declaration, scope
 
@@ -75,7 +72,7 @@ parameter = name:identifier type_annotation?
   => parameter(name)
      derives declaration
 
-block = body:_statement+
+block = body:_statement+ | body:_statement* body:block_tail
   => block(body)
      derives scope
 
@@ -92,15 +89,16 @@ if_statement = "if" condition:_expression "then" body:block? elseif_clause* else
 
 elseif_clause = "elseif" condition:_expression "then" body:block?
 else_clause = "else" body:block?
+for_binding = name:identifier type_annotation?
 
 for_numeric_statement =
-  "for" name:identifier "=" start:_expression "," end:_expression ("," step:_expression)? "do"
-  body:block? "end"
+  "for" name:identifier type_annotation? "=" start:_expression "," end:_expression
+  ("," step:_expression)? "do" body:block? "end"
   => declaration(name)
      derives declaration
 
 for_generic_statement =
-  "for" name:separated1(identifier, ",") "in" value:separated1(_expression, ",") "do" body:block?
+  "for" name:separated1(for_binding, ",") "in" value:separated1(_expression, ",") "do" body:block?
   "end"
   => declaration(name)
      derives declaration
@@ -109,8 +107,6 @@ return_statement = right 0: "return" value:separated1(_expression, ",")? ";"?
   => return(value)
 
 break_statement = "break"
-goto_statement = "goto" name:identifier
-label_statement = "::" name:identifier "::"
 
 open _expression =
   | nil
@@ -135,7 +131,8 @@ long_string = long_string_start long_string_content* long_string_end
 
 vararg_expression = "..."
 
-function_expression = "function" parameters:parameters return_type_annotation? body:block? "end"
+function_expression =
+  "function" generic_list? parameters:parameters return_type_annotation? body:block? "end"
   => function(parameters, body)
      derives scope
 
@@ -143,17 +140,13 @@ parenthesized_expression = "(" _expression ")"
 
 prefix unary_expression over _expression
   => operator(right=argument)
-  right 12: "not" | "#" | "-" | "~"
+  right 12: "not" | "#" | "-"
 
 infix binary_expression over _expression
   => operator(left, right)
   left   1: "or"
   left   2: "and"
   left   3: "<" | ">" | "<=" | ">=" | "~=" | "=="
-  left   4: "|"
-  left   5: "~"
-  left   6: "&"
-  left   7: "<<" | ">>"
   right  8: ".."
   left   9: "+" | "-"
   left  10: "*" | "/" | "//" | "%"
@@ -177,7 +170,7 @@ function_call = left 15: callee:_prefix_expression (":" method:identifier)? argu
 
 arguments = "(" separated(_expression, ",") ")" | table_constructor | quoted_string | long_string
 
-table_constructor = "{" separated(field_entry, ",") ","? "}"
+table_constructor = "{" (separated1(field_entry, "," | ";") ("," | ";")?)? "}"
   => table
 
 field_entry =

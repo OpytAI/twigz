@@ -236,14 +236,30 @@ fn eq_predicate_filters_function_names() {
 }
 
 #[test]
-fn luau_named_function_rewrites_to_two_patterns() {
+fn luau_named_function_rewrites_to_three_patterns() {
     let compiled = compile_query(
         &luau_lang(),
         "(function name: (identifier) @n)",
         QueryView::Semantic,
     )
     .unwrap();
-    assert_eq!(pattern_count(&compiled), 2);
+    assert_eq!(pattern_count(&compiled), 3);
+    let src = rendered_source(&compiled).unwrap();
+    assert!(!src.contains("function_expression"), "{src}");
+    assert!(!src.contains("type_function_declaration"), "{src}");
+    let mut heads: Vec<&str> = src
+        .lines()
+        .filter_map(|line| line.trim().strip_prefix('(')?.split_whitespace().next())
+        .collect();
+    heads.sort_unstable();
+    assert_eq!(
+        heads,
+        [
+            "const_function_declaration",
+            "function_declaration",
+            "local_function_declaration",
+        ]
+    );
 }
 
 #[test]

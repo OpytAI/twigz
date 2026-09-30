@@ -228,6 +228,9 @@ impl Printer {
                 }
                 self.line(span, line);
             }
+            Declaration::ScanLexical { language, span } => {
+                self.line(span, format!("scan lexical {language}"));
+            }
             Declaration::OperatorTable {
                 name,
                 operand,
@@ -276,7 +279,8 @@ fn declaration_class(declaration: &Declaration) -> u8 {
         | Declaration::Scan { .. }
         | Declaration::ScanIndent { .. }
         | Declaration::ScanSlash { .. }
-        | Declaration::ScanTemplate { .. } => 1,
+        | Declaration::ScanTemplate { .. }
+        | Declaration::ScanLexical { .. } => 1,
         Declaration::Rule { token: true, .. } => 2,
         Declaration::Slot { .. } | Declaration::Fill { .. } => 3,
         Declaration::Rule { .. }

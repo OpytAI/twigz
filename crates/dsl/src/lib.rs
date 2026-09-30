@@ -593,6 +593,14 @@ impl Parser {
                 });
                 Ok(())
             }
+            "lexical" if !matches!(self.token().kind, TokenKind::Eq) => {
+                let (language, _) = self.ident()?;
+                if language != "lua" && language != "luau" {
+                    return Err(self.error("scan lexical requires lua or luau"));
+                }
+                module.declarations.push(Declaration::ScanLexical { language, span });
+                self.line_end()
+            }
             name => {
                 if !name
                     .chars()

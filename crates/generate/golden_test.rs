@@ -183,6 +183,9 @@ fn product_and_snapshot_goldens() {
     let mut compiled_names = BTreeSet::new();
     for (name, grammar, modules) in &product {
         compiled_names.insert((*name).to_string());
+        if *name == "lua" || *name == "luau" {
+            continue;
+        }
         let bundle = compile_pair(&root, grammar, modules);
         compare_golden(
             &root.join(format!("data/goldens/ir/{name}.json")),
@@ -221,39 +224,22 @@ fn product_and_snapshot_goldens() {
         language_stems(&root.join("data/goldens/snapshot/semantics")),
         expected_snapshot
     );
-    let expected_extra: BTreeSet<_> = [
-        "local_name",
-        "for_numeric_statement",
-        "for_generic_statement",
-    ]
-    .into_iter()
-    .map(str::to_string)
-    .collect();
     let expected_scan_extra: BTreeSet<_> = [
         "long_string_start",
         "long_string_content",
         "long_string_end",
         "long_comment",
+        "Lexical",
     ]
     .into_iter()
     .map(str::to_string)
     .collect();
     for (name, grammar, modules) in &snapshot {
         let bundle = compile_pair(&root, grammar, modules);
-        compare_golden(
-            &root.join(format!("data/goldens/snapshot/ir/{name}.json")),
-            &bundle["ir"],
-        );
-        compare_golden(
-            &root.join(format!("data/goldens/snapshot/semantics/{name}.json")),
-            &bundle["semantics"],
-        );
+        let product_grammar = if *name == "luau" { "luau" } else { "lua" };
         let product = compile_pair(
             &root,
-            &root.join(format!(
-                "grammars/{}.grammar",
-                if *name == "luau" { "luau" } else { "lua" }
-            )),
+            &root.join(format!("grammars/{product_grammar}.grammar")),
             &[("lua.core", family.as_path())],
         );
         let extra: BTreeSet<_> = mapping_names(&product["semantics"])
@@ -268,13 +254,47 @@ fn product_and_snapshot_goldens() {
             missing.is_empty(),
             "{name} product omitted snapshot mappings {missing:?}"
         );
-        assert_eq!(extra, expected_extra, "{name} mapping extras");
+        assert_eq!(
+            extra,
+            expected_mapping_extra(name),
+            "{name} mapping extras"
+        );
         let scan_extra: BTreeSet<_> = scan_keys(&product["ir"])
             .difference(&scan_keys(&bundle["ir"]))
             .cloned()
             .collect();
         assert_eq!(scan_extra, expected_scan_extra, "{name} scan extras");
+        compare_golden(
+            &root.join(format!("data/goldens/snapshot/ir/{name}.json")),
+            &bundle["ir"],
+        );
+        compare_golden(
+            &root.join(format!("data/goldens/snapshot/semantics/{name}.json")),
+            &bundle["semantics"],
+        );
+        compare_golden(
+            &root.join(format!("data/goldens/ir/{product_grammar}.json")),
+            &product["ir"],
+        );
+        compare_golden(
+            &root.join(format!("data/goldens/semantics/{product_grammar}.json")),
+            &product["semantics"],
+        );
     }
+}
+
+fn expected_mapping_extra(name: &str) -> BTreeSet<String> {
+    let mut names = vec![
+        "local_name",
+        "for_numeric_statement",
+        "for_generic_statement",
+    ];
+    if name == "lua" {
+        names.extend(["bitwise_expression", "tilde_expression"]);
+    } else {
+        names.extend(["const_function_declaration", "type_function_declaration"]);
+    }
+    names.into_iter().map(str::to_string).collect()
 }
 
 #[test]

@@ -33,7 +33,8 @@ A family owns common productions and slots. The root grammar lists every
 family in `use`. Bazel must supply the same module IDs.
 
 Only an `open` production can be extended. A slot can be filled once. An
-unfilled slot disappears inside `?`, `*`, or a choice.
+unfilled slot inside a sequence removes that sequence. An unfilled slot
+inside `?` is empty. Write a language-specific slot as `name?`.
 
 ## Operators
 
@@ -74,13 +75,17 @@ for_numeric_statement = "for" name:identifier "=" …
   => declaration(name)
      derives declaration
 
-for_generic_statement = "for" name:separated1(identifier, ",") "in" …
+for_binding = name:identifier type_annotation?
+
+for_generic_statement = "for" name:separated1(for_binding, ",") "in" …
   => declaration(name)
      derives declaration
 ```
 
-`binding_at` on `local x = 1` hits `local_name`. Anonymous
-`function() end` is `function` + `scope` only, so `binding_at` returns none.
+`for_binding` has no declaration trait. `binding_at` on a generic for name
+hits `for_generic_statement`. `binding_at` on `local x = 1` hits
+`local_name`. Anonymous `function() end` is `function` + `scope` only, so
+`binding_at` returns none.
 
 ## Scanners
 
@@ -102,6 +107,7 @@ scan long_string_content = (!long_string_end .)+
 | `scan indent newline, indent, dedent` | Off-side rule |
 | `scan slash regex, division` | `/` is regex or division |
 | `scan template open …, close …` | Template interpolation |
+| `scan lexical lua` or `scan lexical luau` | Lexical arm on the long-bracket scanner |
 
 `scan slash` lists `regex` and `division` as externals. After `)` `]`
 identifier number string `this` `true`/`false`/`null`, the parser marks

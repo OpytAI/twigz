@@ -121,6 +121,7 @@ twigz is a standalone grammar, parse, and query library.
 | [`docs/LANGUAGE.md`](docs/LANGUAGE.md) | `.grammar` language and lua maps |
 | [`docs/TWIGLET.md`](docs/TWIGLET.md) | Contract fixture |
 | [`docs/TESTING.md`](docs/TESTING.md) | Test layout |
+| [`docs/lua-luau-coverage.md`](docs/lua-luau-coverage.md) | Lua 5.4 and Luau 0.725 parser coverage |
 | [`TREE_SITTER_PIN.md`](TREE_SITTER_PIN.md) | Tree-sitter pin and ABI |
 
 Depend on `@twigz//:twigz`. Use `//:twigz-runtime` to parse and

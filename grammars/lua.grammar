@@ -3,6 +3,33 @@ grammar lua "5.4.0"
 use lua.core
 start source_file
 
-source_file = body:_statement*
+scan lexical lua
+external quoted_string | shebang
+
+map quoted_string => string
+
+token number = /(0[xX]([0-9A-Fa-f]+(\.[0-9A-Fa-f]*)?|\.[0-9A-Fa-f]+)([pP][+-]?[0-9]+)?|[0-9]+(\.[0-9]*)?([eE][+-]?[0-9]+)?|\.[0-9]+([eE][+-]?[0-9]+)?)/
+  => literal
+
+source_file = shebang? body:_statement* body:block_tail?
   => module(body)
      derives scope
+
+fill block_tail = return_statement
+fill local_attribute = "<" identifier ">"
+
+extend _statement = break_statement | goto_statement | label_statement
+goto_statement = "goto" name:identifier
+label_statement = "::" name:identifier "::"
+extend _expression = bitwise_expression | tilde_expression
+
+infix bitwise_expression over _expression
+  => operator(left, right)
+  left 4: "|"
+  left 5: "~"
+  left 6: "&"
+  left 7: "<<" | ">>"
+
+prefix tilde_expression over _expression
+  => operator(right=argument)
+  right 12: "~"

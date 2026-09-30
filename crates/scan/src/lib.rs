@@ -2,7 +2,10 @@
 //!
 //! The packed Tree-sitter scanner is the only scan implementation. This crate
 //! classifies `.grammar` scan rules and emits that C. It does not interpret
-//! tokens in Rust.
+//! tokens in Rust. `scan lexical lua|luau` adds a lexical arm to the long-bracket
+//! scanner.
+
+mod lexical;
 
 use twigz_ir::{GrammarIr, ScanExpr, ScanRule};
 
@@ -20,6 +23,7 @@ pub enum MachineKind {
         content: usize,
         end: usize,
         comment: Option<usize>,
+        lexical: Option<String>,
     },
     Offside {
         tab_width: u8,
@@ -199,6 +203,7 @@ fn recognize_long_bracket(
                 keep,
                 ..
             } => patterns.push((name, expression, keep)),
+            ScanRule::Lexical { .. } => {}
             ScanRule::Indent { .. } | ScanRule::Slash { .. } | ScanRule::Template { .. } => {
                 return Err(format!(
                     "{}: pattern scan rules cannot mix with named machines",
@@ -292,17 +297,42 @@ fn external_names(grammar: &GrammarIr) -> Vec<String> {
 impl GeneratedScanner {
     pub fn from_grammar(grammar: &GrammarIr) -> Result<Self, String> {
         let externals = external_names(grammar);
+        let lexical = grammar.scans.iter().find_map(|rule| match rule {
+            ScanRule::Lexical { language } => Some(language.clone()),
+            _ => None,
+        });
         let has_pattern = grammar
             .scans
             .iter()
             .any(|rule| matches!(rule, ScanRule::Pattern { .. }));
+        if lexical.is_some() && !has_pattern {
+            return Err(format!(
+                "{}: scan lexical requires the long-bracket machine",
+                grammar.name
+            ));
+        }
+        if let Some(language) = &lexical {
+            if twigz_ir::lexical_externals(language).is_none() {
+                return Err(format!(
+                    "{}: scan lexical requires lua or luau",
+                    grammar.name
+                ));
+            }
+        }
         let kind = if has_pattern {
             let layout = recognize_long_bracket(grammar, &externals)?;
+            if let Some(language) = &lexical {
+                let names = twigz_ir::lexical_externals(language).expect("checked above");
+                for name in names {
+                    required_index(&externals, name, &grammar.name)?;
+                }
+            }
             MachineKind::LongBracket {
                 start: layout.start,
                 content: layout.content,
                 end: layout.end,
                 comment: layout.comment,
+                lexical,
             }
         } else if let Some(ScanRule::Indent {
             tab_width,
@@ -410,6 +440,7 @@ fn emit_c_for(scanner: &GeneratedScanner) -> String {
             content,
             end,
             comment,
+            lexical: None,
         } => out.push_str(&long_bracket_c(
             lang,
             &scanner.externals,
@@ -418,6 +449,24 @@ fn emit_c_for(scanner: &GeneratedScanner) -> String {
             *end,
             *comment,
         )),
+        MachineKind::LongBracket {
+            start,
+            content,
+            end,
+            comment,
+            lexical: Some(language),
+        } => {
+            out.push_str("#include <limits.h>\n");
+            out.push_str(&lexical_long_bracket_c(
+                lang,
+                language,
+                &scanner.externals,
+                *start,
+                *content,
+                *end,
+                *comment,
+            ));
+        }
         MachineKind::Offside {
             tab_width,
             mixed_tabs,
@@ -600,6 +649,57 @@ bool tree_sitter_{lang}_external_scanner_scan(void *p, TSLexer *lexer, const boo
         end_tok = end_tok,
         comment_block = comment_block,
     )
+}
+
+fn long_comment_block(externals: &[String], comment: Option<usize>) -> String {
+    let Some(comment) = comment else {
+        return String::new();
+    };
+    let comment_tok = &externals[comment];
+    format!(
+        r#"
+  if (valid[{comment_tok}] && lexer->lookahead == '-') {{
+    adv(lexer);
+    if (lexer->lookahead != '-') return false;
+    adv(lexer);
+    uint8_t eq = 0;
+    if (!opener(lexer, &eq)) return false;
+    unsigned n = 0;
+    while (!done(lexer) && n < 8388608u) {{
+      n++;
+      if (lexer->lookahead == ']') {{
+        if (closer(lexer, eq)) {{ lexer->result_symbol = {comment_tok}; return true; }}
+        continue;
+      }}
+      int32_t ch = lexer->lookahead;
+      uint32_t col = lexer->get_column(lexer);
+      adv(lexer);
+      if (!done(lexer) && lexer->lookahead == ch && lexer->get_column(lexer) == col) break;
+    }}
+    lexer->result_symbol = {comment_tok};
+    return true;
+  }}"#
+    )
+}
+
+fn lexical_long_bracket_c(
+    lang: &str,
+    lexical_language: &str,
+    externals: &[String],
+    start: usize,
+    content: usize,
+    end: usize,
+    comment: Option<usize>,
+) -> String {
+    let helpers = lexical::helpers(lexical_language).expect("lexical language");
+    lexical::SKELETON
+        .replace("@@ENUM@@", &token_enum(externals))
+        .replace("@@LANG@@", lang)
+        .replace("@@COMMENT@@", &long_comment_block(externals, comment))
+        .replace("@@HELPERS@@", &helpers)
+        .replace("@@START@@", &externals[start])
+        .replace("@@CONTENT@@", &externals[content])
+        .replace("@@END@@", &externals[end])
 }
 
 fn offside_c(
